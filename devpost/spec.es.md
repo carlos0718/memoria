@@ -109,7 +109,7 @@ Continúa `prd.md > Look and Feel`, con personajes de Rick and Morty en lugar de
 ## Componentes
 
 ### Motor del juego (`game/engine.ts`)
-Una máquina de estados pura: `(estado, acción) → nuevoEstado`, sin DOM, sin temporizadores y sin red. Acciones: `setName`, `rollDice`, `flip(position, by)`, `hideMismatch`, `nextLevel`, `restart`. Hace cumplir las reglas: solo el jugador activo da vuelta cartas, un par acertado va a la columna de quien lo encontró y esa persona sigue jugando, un par fallado pasa el turno después del tiempo de muestra, y los empates se resuelven con las reglas de puntaje.
+Una máquina de estados pura: `(estado, acción) → nuevoEstado`, sin DOM, sin temporizadores y sin red. Acciones: `setName`, `rollDice`, `flip(position, by)`, `hideMismatch`, `nextLevel`, `restart`, `resume`. `nextLevel` termina el juego después del nivel 5 o apenas se cumple `isDecided` (ventaja > niveles que quedan; agregado durante el build). Hace cumplir las reglas: solo el jugador activo da vuelta cartas, un par acertado va a la columna de quien lo encontró y esa persona sigue jugando, un par fallado pasa el turno después del tiempo de muestra, y los empates se resuelven con las reglas de puntaje.
 Fases: `welcome → dice → playerTurn | aiTurn → revealMismatch → levelEnd → gameOver`.
 Ref. PRD: `prd.md > Turns and Pairs`, `prd.md > Level Scoreboard and End of Game`, `prd.md > States and Boundaries`.
 

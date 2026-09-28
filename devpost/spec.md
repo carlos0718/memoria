@@ -109,7 +109,7 @@ Carries forward `prd.md > Look and Feel`, with Rick and Morty characters replaci
 ## Components
 
 ### Game Engine (`game/engine.ts`)
-A pure state machine: `(state, action) → newState`, with no DOM, no timers, and no network. Actions: `setName`, `rollDice`, `flip(position, by)`, `hideMismatch`, `nextLevel`, `restart`. Enforces the rules: only the active player can flip, a matched pair goes to the finder's column and the finder plays again, a mismatch passes the turn after the reveal time, and ties are resolved by the scoring rules.
+A pure state machine: `(state, action) → newState`, with no DOM, no timers, and no network. Actions: `setName`, `rollDice`, `flip(position, by)`, `hideMismatch`, `nextLevel`, `restart`, `resume`. `nextLevel` ends the game after level 5 or as soon as `isDecided` (lead > levels left; added during the build). Enforces the rules: only the active player can flip, a matched pair goes to the finder's column and the finder plays again, a mismatch passes the turn after the reveal time, and ties are resolved by the scoring rules.
 Phases: `welcome → dice → playerTurn | aiTurn → revealMismatch → levelEnd → gameOver`.
 PRD ref: `prd.md > Turns and Pairs`, `prd.md > Level Scoreboard and End of Game`, `prd.md > States and Boundaries`.
 

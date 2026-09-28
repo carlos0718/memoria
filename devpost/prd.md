@@ -84,6 +84,7 @@ Source: `scope.md > The Unique Kernel`.
 - [ ] When a level ends, whoever collected more pairs gets 1 level win on the scoreboard, and a win or loss message appears over the board.
 - [ ] Tied pairs → tie message, nobody scores, and play moves to the next level.
 - [ ] Each level is played once: after any result, play moves to the next.
+- [ ] Best of 5: the game ends early as soon as the lead in level wins is bigger than the levels left (e.g. 3–0 after level 3, 3–1 after level 4), with a "The game is decided!" message before the final screen. *(Added during `5-build`.)*
 - [ ] The level scoreboard (player vs. AI) is always visible.
 - [ ] After level 5, whoever has more level wins takes the game. If the player wins → shiny yellow trophy spinning with confetti.
 - [ ] If the AI wins → a little robot raising the trophy, with a message that the AI won.

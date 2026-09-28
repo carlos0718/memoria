@@ -113,10 +113,16 @@ function scoreLevel(state: GameState): GameState {
   return { ...state, levelWins, lastLevelResult: result, phase: "levelEnd" };
 }
 
-/** After the level result: next level (new characters, dice again), or the final result after level 5. */
+/** Best of 5: the game is decided once the lead is bigger than the levels left to play. */
+export function isDecided(state: GameState): boolean {
+  const remaining = LAST_LEVEL - state.level;
+  return Math.abs(state.levelWins.human - state.levelWins.ai) > remaining;
+}
+
+/** After the level result: next level (new characters, dice again), or the final result after level 5 or once decided. */
 export function nextLevel(state: GameState, poolIds: readonly number[]): GameState {
   if (state.phase !== "levelEnd") return state;
-  if (state.level >= LAST_LEVEL) return { ...state, phase: "gameOver" };
+  if (state.level >= LAST_LEVEL || isDecided(state)) return { ...state, phase: "gameOver" };
   return startLevel(state, (state.level + 1) as Level, poolIds);
 }
 

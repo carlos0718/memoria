@@ -1,10 +1,10 @@
 // Welcome modal (name + instructions) and the result overlays shown over the board.
-import { MAX_NAME_LENGTH } from "../game/engine";
+import { isDecided, MAX_NAME_LENGTH } from "../game/engine";
 import { LAST_LEVEL } from "../game/levels";
 import type { GameState } from "../game/types";
 
 /** A modal with some content and one button. Escape can't skip it: the button moves the game on. */
-export function openOverlay(contentHtml: string, buttonLabel: string, onClose: () => void): void {
+export function openOverlay(contentHtml: string, buttonLabel: string, onClose: () => void): HTMLDialogElement {
   const dialog = document.createElement("dialog");
   dialog.className = "modal overlay";
   dialog.innerHTML = `<form method="dialog" class="modal-body">${contentHtml}<button class="btn" type="submit">${buttonLabel}</button></form>`;
@@ -16,6 +16,23 @@ export function openOverlay(contentHtml: string, buttonLabel: string, onClose: (
   document.body.append(dialog);
   dialog.showModal();
   dialog.querySelector<HTMLButtonElement>("button")!.focus();
+  return dialog;
+}
+
+/** Phone: tapping a name shows that player's pairs this level and levels won. */
+export function showPlayerDetails(state: GameState, who: "human" | "ai", fill: (pile: HTMLElement) => void): void {
+  const name = who === "human" ? escapeHtml(state.name) : "AI";
+  const dialog = openOverlay(
+    `<div class="result result-${who}">
+      <h2>${name}</h2>
+      <p class="final-score">Level ${state.level}: ${state.pairs[who].length} pairs</p>
+      <p>Levels won: ${state.levelWins[who]}</p>
+      <div class="pile pile-details" aria-label="Collected pairs"></div>
+    </div>`,
+    "Close",
+    () => {},
+  );
+  fill(dialog.querySelector<HTMLElement>(".pile-details")!);
 }
 
 export function showLevelResult(state: GameState, onNext: () => void): void {
@@ -25,8 +42,12 @@ export function showLevelResult(state: GameState, onNext: () => void): void {
   const title =
     result === "human" ? "You win the level!" : result === "ai" ? "The AI wins the level!" : "Level tied!";
   const detail = result === "tie" ? "Nobody scores this time." : "+1 on the level scoreboard.";
-  const last = state.level >= LAST_LEVEL;
-  const next = last
+  const decided = state.level < LAST_LEVEL && isDecided(state);
+  const last = state.level >= LAST_LEVEL || decided;
+  const leader = state.levelWins.human > state.levelWins.ai ? "The AI" : escapeHtml(state.name);
+  const next = decided
+    ? `<strong>The game is decided!</strong> ${leader} can't catch up.`
+    : last
     ? "That was the last level. Let's see who won the game..."
     : `Next up: <strong>Level ${state.level + 1}</strong>. More cards, less time, and a sharper AI.`;
   openOverlay(

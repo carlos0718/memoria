@@ -629,3 +629,107 @@ body {
     transform: translateY(-8px);
   }
 }
+
+.col-chip {
+  display: none;
+  margin: 0;
+}
+
+.pile-details {
+  grid-template-columns: repeat(5, 36px);
+  justify-content: center;
+}
+
+/* ---- Phone ---- */
+
+@media (max-width: 640px) {
+  body {
+    padding: 0 12px;
+  }
+
+  .top {
+    padding: 14px 0 4px;
+  }
+
+  .game {
+    gap: 14px;
+    padding-top: 8px;
+  }
+
+  /* Names on top (tap for details), then level / turn / dice, then the board. */
+  .hud {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      "human ai"
+      "center center";
+    gap: 10px;
+  }
+
+  #col-human {
+    grid-area: human;
+  }
+
+  #col-ai {
+    grid-area: ai;
+  }
+
+  .hud-center {
+    grid-area: center;
+  }
+
+  .column {
+    max-width: none;
+    padding: 8px 10px;
+    cursor: pointer;
+  }
+
+  .column .col-stat,
+  .column > .pile {
+    display: none;
+  }
+
+  .col-chip {
+    display: block;
+    font-size: 8px;
+  }
+
+  .col-name {
+    margin: 0 0 4px;
+    font-size: 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .column::after {
+    content: "tap for details";
+    display: block;
+    margin-top: 4px;
+    font-size: 6px;
+    opacity: 0.6;
+  }
+
+  .level-badge {
+    font-size: 9px;
+  }
+
+  .die-scene {
+    --die: 44px;
+  }
+
+  .dice-log {
+    font-size: 10px;
+  }
+
+  /* Full-width board, 4 columns at every level; the page scrolls down, never sideways. */
+  .board {
+    grid-template-columns: repeat(var(--cols-phone, 4), 1fr);
+    width: 100%;
+    gap: 8px;
+  }
+
+  .card-face {
+    border-width: 3px;
+    box-shadow: 3px 3px 0 #000;
+  }
+}

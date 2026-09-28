@@ -18,6 +18,7 @@ export function mountBoard(container: HTMLElement, state: GameState, deps: Board
   const cols = LEVELS[state.level].desktopCols;
   container.style.setProperty("--cols", String(cols));
   container.style.setProperty("--rows", String(Math.ceil(state.cards.length / cols)));
+  container.style.setProperty("--cols-phone", String(LEVELS[state.level].phoneCols));
   const back = portalSvg();
   for (const card of state.cards) {
     const button = document.createElement("button");

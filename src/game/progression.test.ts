@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { buildView } from "../ai/aiPlayer";
 import { localPick } from "../ai/localPolicy";
 import { POOL_IDS } from "../services/characters";
-import { flip, gameWinner, hideMismatch, newGame, nextLevel, restart, rollDice, setName } from "./engine";
+import { flip, gameWinner, hideMismatch, isDecided, newGame, nextLevel, restart, rollDice, setName } from "./engine";
 import { LEVELS } from "./levels";
 import { createRng, nextFloat, type RngState } from "./rng";
 import type { GameState, Player } from "./types";
@@ -67,21 +67,36 @@ describe("level scoring", () => {
 });
 
 describe("levels and end of game", () => {
-  it("each level is played once, with the right card count, until the game ends", () => {
+  it("each level is played once, with the right card count, until the game ends (level 5 or decided)", () => {
+    for (let seed = 1; seed <= 30; seed++) {
+      const random = seededRandom(seed * 13);
+      let s = setName(newGame(seed, POOL_IDS), "Ana");
+      const seen: number[] = [];
+      while (s.phase !== "gameOver") {
+        expect(s.phase).toBe("dice");
+        expect(s.dice).toBeUndefined();
+        seen.push(s.cards.length);
+        s = playLevel(s, random);
+        expect(s.phase).toBe("levelEnd");
+        const ended = s.level === 5 || isDecided(s);
+        s = nextLevel(s, POOL_IDS);
+        expect(s.phase === "gameOver").toBe(ended);
+      }
+      expect(seen).toEqual([12, 16, 20, 24, 28].slice(0, seen.length));
+      expect(seen.length).toBeGreaterThanOrEqual(3);
+    }
+  });
+
+  it("a full 5-level game ends after level 5", () => {
     const random = seededRandom(99);
     let s = setName(newGame(5, POOL_IDS), "Ana");
-    const seen: number[] = [];
     for (let level = 1; level <= 5; level++) {
-      expect(s.level).toBe(level);
-      expect(s.phase).toBe("dice");
       expect(s.cards).toHaveLength(LEVELS[s.level].cards);
-      expect(s.dice).toBeUndefined();
-      seen.push(s.cards.length);
       s = playLevel(s, random);
-      expect(s.phase).toBe("levelEnd");
+      // Keep it close so it never ends early: force a tie on the scoreboard.
+      s = { ...s, levelWins: { human: 0, ai: 0 } };
       s = nextLevel(s, POOL_IDS);
     }
-    expect(seen).toEqual([12, 16, 20, 24, 28]);
     expect(s.phase).toBe("gameOver");
     const { human, ai } = s.levelWins;
     expect(human + ai).toBeLessThanOrEqual(5);
@@ -122,5 +137,28 @@ describe("restart", () => {
     const ids = (st: GameState) => [...new Set(st.cards.map((c) => c.characterId))].sort();
     expect(ids(restart(over, 3, POOL_IDS))).not.toEqual(ids(restart(over, 4, POOL_IDS)));
     expect(ids(restart(over, 3, POOL_IDS))).toEqual(ids(restart(over, 3, POOL_IDS)));
+  });
+});
+
+describe("best of 5: the game ends early once decided", () => {
+  const at = (level: 1 | 2 | 3 | 4 | 5, human: number, ai: number): GameState => ({
+    ...named({ human, ai }),
+    level,
+    phase: "levelEnd",
+  });
+
+  it("ends when the lead is bigger than the levels left", () => {
+    expect(isDecided(at(3, 3, 0))).toBe(true); // 2 left, lead 3
+    expect(isDecided(at(4, 3, 1))).toBe(true); // 1 left, lead 2
+    expect(isDecided(at(3, 0, 3))).toBe(true);
+    expect(nextLevel(at(3, 3, 0), POOL_IDS).phase).toBe("gameOver");
+    expect(nextLevel(at(4, 1, 3), POOL_IDS).phase).toBe("gameOver");
+  });
+
+  it("keeps playing while the trailing player can still tie or win", () => {
+    expect(isDecided(at(4, 2, 1))).toBe(false); // 1 left, lead 1: can still tie
+    expect(isDecided(at(3, 2, 0))).toBe(false); // 2 left, lead 2
+    expect(isDecided(at(2, 1, 1))).toBe(false);
+    expect(nextLevel(at(4, 2, 1), POOL_IDS).level).toBe(5);
   });
 });

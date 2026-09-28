@@ -49,7 +49,7 @@ Build mode: learn
   Learner check: Play a few turns into level 2, close the tab, reopen it, and check that everything is exactly where you left it, with no name prompt.
   Commit: `Save and restore the exact game in the browser`
 
-- [ ] **5. It plays well on a phone**
+- [x] **5. It plays well on a phone**
   Becomes usable: On a narrow screen the board takes the full width (4-column grids, level 5 as 4×7 with no horizontal scroll). Names and level wins sit above the board, and tapping a name opens a modal with that player's pairs this level. Dice roll with a tap.
   Why now: All the screens exist, so the responsive pass happens once over the finished UI.
   PRD ref: `prd.md > Screens and Layout`, `prd.md > Levels` ("Level 5's 28 cards fit on a phone screen")
@@ -94,3 +94,4 @@ Activity mode:
 
 - Desktop layout moved the player and AI cards into a top HUD row beside the level/turn/dice stack, with the board full width below — the side columns squeezed the cards at higher levels (slice 3 review).
 - Dice throw once per press and a tie waits for another press, instead of auto re-rolling — the learner wanted more participation (slice 2 review).
+- The game ends early once decided (best of 5), instead of always playing all 5 levels — the learner noticed a 3–1 lead after level 4 made level 5 pointless. Tradeoff accepted: a lopsided game may never reach the level-5 AI, so the demo recording should use a close game.

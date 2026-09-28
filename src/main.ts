@@ -8,11 +8,11 @@ import type { GameState, Player } from "./game/types";
 import { fetchPool, POOL_IDS, preloadImages } from "./services/characters";
 import { loadGame, saveGame } from "./services/storage";
 import { mountBoard, updateBoard, type BoardDeps } from "./ui/board";
-import { mountColumn, updateColumn } from "./ui/columns";
+import { fillPile, mountColumn, updateColumn } from "./ui/columns";
 import { animateRoll, mountDice, updateDice } from "./ui/dice";
 import { hideHand, pointAt } from "./ui/hand";
 import { showGameOver } from "./ui/effects";
-import { showLevelResult, showWelcome } from "./ui/modals";
+import { showLevelResult, showPlayerDetails, showWelcome } from "./ui/modals";
 
 // `?speed=fast` shortens every wait (for testing and for recording the demo).
 const SPEED = new URLSearchParams(location.search).get("speed") === "fast" ? 0.25 : 1;
@@ -150,8 +150,9 @@ async function goNextLevel(): Promise<void> {
 }
 
 async function start(): Promise<void> {
-  mountColumn(colEl.human, "human");
-  mountColumn(colEl.ai, "ai");
+  for (const who of ["human", "ai"] as Player[]) {
+    mountColumn(colEl[who], who, () => showPlayerDetails(state, who, (pile) => fillPile(pile, state.pairs[who], deps)));
+  }
   mountDice(diceEl, () => void roll());
   document.addEventListener("keydown", (e) => {
     if (state.phase !== "dice" || (e.key !== " " && e.key !== "Enter")) return;

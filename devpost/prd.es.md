@@ -82,6 +82,7 @@ Source: `scope.md > The Unique Kernel`.
 - [ ] Al terminar un nivel, quien juntó más pares suma 1 nivel ganado en el marcador, y se ve un mensaje de victoria o derrota sobre el tablero.
 - [ ] Empate de pares → mensaje de empate, nadie suma, y se pasa al nivel siguiente.
 - [ ] Cada nivel se juega una sola vez: después de cualquier resultado se pasa al siguiente.
+- [ ] Mejor de 5: el juego termina antes apenas la ventaja en niveles ganados es mayor que los niveles que quedan (por ejemplo, 3–0 después del nivel 3, 3–1 después del nivel 4), con un mensaje "The game is decided!" antes de la pantalla final. *(Agregado durante `5-build`.)*
 - [ ] El marcador de niveles ganados (jugador vs. IA) está siempre a la vista.
 - [ ] Al terminar el nivel 5 gana el juego quien tenga más niveles ganados. Si gana el jugador → trofeo amarillo brillante girando con confeti.
 - [ ] Si gana la IA → se muestra un robotcito levantando la copa, con un mensaje de que ganó la IA.
