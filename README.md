@@ -8,8 +8,18 @@ Built for the Devpost *Build With AI: Basics* hackathon. The planning documents 
 
 The AI has two halves:
 
-1. **An imperfect memory (our code).** The AI sees every card that gets flipped, but only remembers each one with a probability that rises by level: 20% at level 1, 95% at level 5. It's plain TypeScript with a seeded random generator, so it's tested (`src/ai/kernel.test.ts` simulates 500 games per level).
-2. **Jev picks the move.** On its turn, the AI sends only what it remembers to [Jev](https://docs.typesafe.ai/), a typed-decision model by TypeSafe, and asks which card to flip. Jev answers with a choice and a confidence. If Jev is unsure (confidence under 50%), slow, or unavailable, a local rules player decides. The "AI brain" label in the AI's card shows who chose each move.
+1. **An imperfect memory (our code).** The AI never peeks at face-down cards. It sees every card that gets flipped, both yours and its own, but only remembers each one with a probability that rises by level. It's plain TypeScript with a seeded random generator, so it's tested (`src/ai/kernel.test.ts` simulates 500 games per level).
+
+   | Level | Cards | Chance the AI remembers each card it sees |
+   |---|---|---|
+   | 1 | 12 | 20% |
+   | 2 | 16 | 40% |
+   | 3 | 20 | 60% |
+   | 4 | 24 | 80% |
+   | 5 | 28 | 95% |
+
+   That's why at level 1 the AI can walk past a pair you know it has seen: it saw both cards but forgot them.
+2. **Jev picks the move.** On its turn, the AI sends only what it remembers (which cards are still face down, which of those it remembers, and its first pick of the turn, if any) to [Jev](https://docs.typesafe.ai/), a typed-decision model by TypeSafe, and asks which card to flip. Jev answers with a choice and a confidence. If Jev is unsure (confidence under 50%), slow, or unavailable, a local rules player decides. The "AI brain" label in the AI's card shows who chose each move.
 
 It is not a chatbot: Jev only returns a typed choice with probabilities.
 
