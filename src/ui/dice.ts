@@ -53,6 +53,7 @@ function land(die: HTMLElement, value: number, durationMs: number): void {
   // Add whole turns on top of the landing rotation so the die tumbles, then eases out.
   const turns = durationMs > 0 ? (spins.get(die) ?? 0) + 3 + Math.floor(Math.random() * 3) : 0;
   spins.set(die, turns);
+  die.dataset.value = String(value);
   const [x, y] = FACE_ROTATION[value]!;
   die.style.transition = durationMs > 0 ? `transform ${durationMs}ms cubic-bezier(0.15, 0.6, 0.25, 1)` : "none";
   die.style.transform = `rotateX(${turns * 360 + x}deg) rotateY(${turns * 360 + y}deg)`;
@@ -91,9 +92,10 @@ export function updateDice(container: HTMLElement, state: GameState): void {
   container.classList.toggle("is-waiting", waiting);
   const d = dice(container);
   const last = state.dice?.rolls[state.dice.rolls.length - 1];
-  if (!last) {
-    land(d.human, 1, 0);
-    land(d.ai, 1, 0);
+  // Show the saved throw (e.g. after a reload), or a neutral 1 before the first throw.
+  for (const who of ["human", "ai"] as Player[]) {
+    const value = last ? last[who] : 1;
+    if (d[who].dataset.value !== String(value)) land(d[who], value, 0);
   }
   if (waiting && last) {
     log.textContent = `${last.human} - ${last.ai}: tie! Press SPACE or tap to roll again`;

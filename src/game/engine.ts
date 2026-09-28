@@ -131,6 +131,20 @@ export function restart(state: GameState, seed: number, poolIds: readonly number
   return startLevel({ ...fresh, name: state.name, lastLevelResult: undefined }, 1, poolIds);
 }
 
+/**
+ * A saved game coming back after the tab was closed: unmatched face-up cards
+ * flip back down. A pending miss resumes as the next player's turn; a half-done
+ * turn restarts for the same player. Dice already rolled stay rolled.
+ */
+export function resume(state: GameState): GameState {
+  if (state.phase === "revealMismatch") return hideMismatch(state);
+  if (state.flipped.length === 0) return state;
+  const cards = state.cards.map((c) =>
+    state.flipped.includes(c.position) && c.state === "up" ? { ...c, state: "down" as const } : c,
+  );
+  return { ...state, cards, flipped: [] };
+}
+
 /** After the reveal time: flip the missed pair back down and pass the turn. */
 export function hideMismatch(state: GameState): GameState {
   if (state.phase !== "revealMismatch") return state;

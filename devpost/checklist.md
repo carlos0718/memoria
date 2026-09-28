@@ -39,7 +39,7 @@ Build mode: learn
   Learner check: Play through to the end (or use the debug seed flag if added for speed). Each level should have more cards, the level-5 AI should clearly remember better, and you should see the right ending screen and be able to restart with new characters.
   Commit: `Add five levels, level scoreboard, and end-of-game screens`
 
-- [ ] **4. Closing the browser doesn't lose your game**
+- [x] **4. Closing the browser doesn't lose your game**
   Becomes usable: Reloading or reopening the tab restores the exact board: name, level, scoreboard, collected pairs in each column, face-down cards in the same places, the AI's memory, and whose turn it is. Face-up unmatched cards flip back down, and dice already rolled aren't rolled again.
   Why now: The whole state shape exists after slice 3, so saving it now catches data model mistakes before the layout and Jev work.
   PRD ref: `prd.md > Resume Where You Left Off`, `prd.md > States and Boundaries`

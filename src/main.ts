@@ -1,11 +1,12 @@
 // Bootstrap and the only place with timers: engine → render wiring and the AI turn loop.
 import "./styles/main.css";
 import { chooseAiPick } from "./ai/aiPlayer";
-import { flip, gameWinner, hideMismatch, newGame, nextLevel, restart, rollDice, setName } from "./game/engine";
+import { flip, gameWinner, hideMismatch, newGame, nextLevel, restart, resume, rollDice, setName } from "./game/engine";
 import { LAST_LEVEL, LEVELS } from "./game/levels";
 import { randomSeed } from "./game/rng";
 import type { GameState, Player } from "./game/types";
 import { fetchPool, POOL_IDS, preloadImages } from "./services/characters";
+import { loadGame, saveGame } from "./services/storage";
 import { mountBoard, updateBoard, type BoardDeps } from "./ui/board";
 import { mountColumn, updateColumn } from "./ui/columns";
 import { animateRoll, mountDice, updateDice } from "./ui/dice";
@@ -27,7 +28,9 @@ const colEl: Record<Player, HTMLElement> = {
   ai: document.querySelector<HTMLElement>("#col-ai")!,
 };
 
-let state: GameState = newGame(randomSeed(), POOL_IDS);
+// Come back to the saved game if there is one (spec.md > Storage).
+const saved = loadGame();
+let state: GameState = saved ? resume(saved) : newGame(randomSeed(), POOL_IDS);
 let deps: BoardDeps;
 let aiRunning = false;
 let rolling = false;
@@ -72,16 +75,23 @@ function setState(next: GameState): void {
   if (next.flipped.length === 0 && prev.flipped.length === 1) lastEvent = "match";
   else if (next.phase === "revealMismatch") lastEvent = "miss";
   else if (next.turn !== prev.turn || next.phase !== prev.phase) lastEvent = null;
+  saveGame(state);
   render();
+  enterPhase(prev);
+}
 
+/** Side effects of arriving in a phase: timers, overlays, the hand, the AI loop. `prev` is null on page load. */
+function enterPhase(prev: GameState | null): void {
+  const arrived = (phase: GameState["phase"]) => state.phase === phase && prev?.phase !== phase;
+  if (arrived("welcome")) showWelcome((name) => setState(setName(state, name)));
   if (state.phase === "revealMismatch") {
     setTimeout(() => setState(hideMismatch(state)), LEVELS[state.level].revealMs * SPEED);
   }
-  if (state.phase === "levelEnd" && prev.phase !== "levelEnd") {
+  if (arrived("levelEnd")) {
     // Let the last pair land before the result pops up.
     setTimeout(() => showLevelResult(state, () => void goNextLevel()), 700 * SPEED);
   }
-  if (state.phase === "gameOver" && prev.phase !== "gameOver") {
+  if (arrived("gameOver")) {
     showGameOver(state, gameWinner(state), () => void loadLevel(restart(state, randomSeed(), POOL_IDS)));
   }
   if (state.phase === "playerTurn") void pointAt(colEl.human.querySelector(".col-name")!, SPEED);
@@ -160,8 +170,9 @@ async function start(): Promise<void> {
     onFlip: (position) => setState(flip(state, position, "human")),
   };
   mountBoard(boardEl, state, deps);
+  saveGame(state);
   render();
-  showWelcome((name) => setState(setName(state, name)));
+  enterPhase(null);
 }
 
 void start();
