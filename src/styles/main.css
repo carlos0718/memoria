@@ -733,3 +733,23 @@ body {
     box-shadow: 3px 3px 0 #000;
   }
 }
+
+.col-brain {
+  margin: 8px 0 0;
+  padding: 4px 6px;
+  font-size: 8px;
+  background: #eef3f7;
+  border: 2px solid #1f8fa0;
+}
+
+.col-brain[data-source="jev"] {
+  background: var(--cyan);
+}
+
+@media (max-width: 640px) {
+  .col-brain {
+    display: block;
+    margin-top: 4px;
+    font-size: 7px;
+  }
+}

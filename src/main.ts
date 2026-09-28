@@ -8,7 +8,7 @@ import type { GameState, Player } from "./game/types";
 import { fetchPool, POOL_IDS, preloadImages } from "./services/characters";
 import { loadGame, saveGame } from "./services/storage";
 import { mountBoard, updateBoard, type BoardDeps } from "./ui/board";
-import { fillPile, mountColumn, updateColumn } from "./ui/columns";
+import { fillPile, mountColumn, setBrain, updateColumn } from "./ui/columns";
 import { animateRoll, mountDice, updateDice } from "./ui/dice";
 import { hideHand, pointAt } from "./ui/hand";
 import { showGameOver } from "./ui/effects";
@@ -106,8 +106,9 @@ async function runAiTurn(): Promise<void> {
   try {
     await pointAt(colEl.ai.querySelector(".col-name")!, SPEED);
     while (state.phase === "aiTurn") {
-      await sleep(AI_THINK_MS);
-      const pick = await chooseAiPick(state);
+      // Ask Jev while the AI "thinks", so its latency doesn't add to the wait.
+      const [pick] = await Promise.all([chooseAiPick(state), sleep(AI_THINK_MS)]);
+      setBrain(colEl.ai, pick);
       const cardEl = boardEl.children[pick.position];
       if (cardEl) await pointAt(cardEl, SPEED);
       setState(flip(state, pick.position, "ai"));

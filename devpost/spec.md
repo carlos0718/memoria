@@ -273,7 +273,8 @@ project-x/
   // → answers.move = { choice: "pos_0", probabilities: {...}, confidence: 0.82 }
   ```
 - **Cost:** ~US$42 per billion input tokens (from typesafe.ai). Negligible here.
-- **Unverified:** rate limits, typical latency, whether the account has credits. Check in build step 1.
+- **Verified in slice 6:** real calls take ~290–460 ms (well under the 3 s browser timeout). Jev is very confident on clear choices (completing a remembered pair: 98%) and reports low confidence (13–43%) when many options look alike (the first card of a turn), so the 0.5 gate hands those picks to the rules player. Option descriptions spell out what the AI's memory implies for each card ("same character as the first card", "a known pair") without revealing forgotten cards. Code layout: pure validation/question building in `api/_lib/jev.ts` (not deployed as a function), handler in `api/ai-move.ts` using the Web `POST(request)` signature.
+- **Still unverified:** rate limits.
 - Docs: https://docs.typesafe.ai/introduction/quickstart · https://docs.typesafe.ai/primitives/choice · https://docs.typesafe.ai/confidence
 
 ### Rick and Morty API

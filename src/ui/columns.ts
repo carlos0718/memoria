@@ -22,7 +22,20 @@ export function mountColumn(container: HTMLElement, who: Player, onOpenDetails: 
     <p class="col-chip">Levels: <strong class="col-levels-chip">0</strong></p>
     <p class="col-stat">Pairs: <strong class="col-pairs">0</strong></p>
     <p class="col-stat">Levels won: <strong class="col-levels">0</strong></p>
-    <div class="pile" aria-label="Collected pairs"></div>`;
+    <div class="pile" aria-label="Collected pairs"></div>
+    ${who === "ai" ? `<p class="col-brain" title="Who chose the AI's last card">AI brain: ...</p>` : ""}`;
+}
+
+/** Shows who picked the AI's last card: Jev (with its confidence) or the rules fallback. */
+export function setBrain(container: HTMLElement, pick: { source: "jev" | "rules"; confidence?: number }): void {
+  const el = container.querySelector<HTMLElement>(".col-brain");
+  if (!el) return;
+  const pct = pick.confidence === undefined ? "" : ` ${Math.round(pick.confidence * 100)}%`;
+  el.textContent =
+    pick.source === "jev"
+      ? `AI brain: Jev${pct}`
+      : `AI brain: Rules${pick.confidence === undefined ? "" : ` (Jev unsure${pct})`}`;
+  el.dataset.source = pick.source;
 }
 
 export function updateColumn(container: HTMLElement, who: Player, state: GameState, deps: ColumnDeps): void {
