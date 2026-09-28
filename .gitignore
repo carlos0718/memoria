@@ -1,0 +1,12 @@
+# Contexto personal de aprendizaje (no se commitea)
+/devpost/learner-profile.md
+
+# Credenciales locales
+.env
+.env.*
+!.env.example
+
+# Dependencies and build output
+node_modules/
+dist/
+.vercel/
