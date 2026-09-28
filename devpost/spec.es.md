@@ -84,6 +84,7 @@ graph LR
   ```
 - **Correr solo la UI (sin key):** `npm run dev` → http://localhost:5173. Ahí `/api/ai-move` no existe, así que la IA usa automáticamente el jugador local de reglas. El indicador del cerebro de la IA muestra "Rules".
 - **Forzar el jugador de reglas en cualquier lado:** agregar `?ai=local` a la URL (útil para testear y como red de seguridad en el demo).
+- **Jugar más rápido:** agregar `?speed=fast` acorta todas las esperas a un cuarto (dados, jugadas de la IA, tiempos de muestra). Sirve para probar los 5 niveles y para grabar el demo (agregado en el slice 3).
 - **Tests:** `npm test` (Vitest, sin red: Jev y la Rick and Morty API se simulan).
 - **Entrega:** video demo de 1 a 3 minutos (tramos acelerados, niveles 1 → 5) y el repo público de GitHub con `devpost/scope.md`, `prd.md` y `spec.md`.
 - **Deploy opcional (elegido):** Vercel, lo hace el autor en `6-ship` (`vercel` → preview, `vercel --prod` → link público, después de cargar `TYPESAFE_API_KEY` en el panel de Vercel).
@@ -99,6 +100,8 @@ Continúa `prd.md > Look and Feel`, con personajes de Rick and Morty en lugar de
 - **Dorso de las cartas:** un remolino de portal pixelado en verde (CSS o SVG inline).
 - **Cartas de respaldo:** un número grande pixelado sobre un color sólido de la paleta, del mismo tamaño que una carta.
 - **Detalles distintivos:** manito pixelada (SVG inline) que se desliza hasta la carta que da vuelta la IA; trofeo amarillo girando (rotación CSS 3D) con `canvas-confetti`; robot pixelado sosteniendo el trofeo (SVG inline).
+- **Layout de escritorio (revisión del slice 3):** una franja superior con la tarjeta del jugador a la izquierda, la etiqueta de nivel + el cartel de turno (mismo ancho que la etiqueta, dos líneas) + los dados en el centro, y la tarjeta de la IA a la derecha; el tablero debajo usa todo el ancho, con cartas de hasta 124px y limitadas por el alto de la pantalla para que entren todas las filas. Título "MemorIA" de hasta 48px.
+- **Bienvenida:** Start queda deshabilitado hasta que se escribe un nombre no vacío (evita el mensaje de validación del navegador en otro idioma).
 - **Movimiento:** vueltas rápidas de 150 a 250 ms; la manito de la IA tarda unos 600 ms por jugada para que quien mira pueda seguirla.
 - **Textos:** todos en inglés, cortos y juguetones ("Your turn!", "The AI found a pair!", "Level 3 — AI memory: sharper").
 - **Pie de página con créditos:** "Character images from The Rick and Morty API (rickandmortyapi.com). Rick and Morty © Adult Swim / Warner Bros. Discovery. Non-commercial fan project."

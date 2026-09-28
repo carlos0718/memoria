@@ -38,18 +38,18 @@ body {
 }
 
 .top {
-  padding: 20px 0 8px;
+  padding: 24px 0 8px;
 }
 
 .logo {
   margin: 0;
-  font-size: clamp(20px, 5vw, 32px);
-  text-shadow: 3px 3px 0 #fff;
+  font-size: clamp(28px, 7vw, 48px);
+  text-shadow: 4px 4px 0 #fff;
 }
 
 .logo span {
   color: var(--portal);
-  text-shadow: 3px 3px 0 #000;
+  text-shadow: 4px 4px 0 #000;
 }
 
 .game {
@@ -58,10 +58,41 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 18px;
+  justify-content: flex-start;
+  gap: 20px;
   flex: 1;
-  padding: 12px 0;
+  padding: 20px 0 12px;
+}
+
+/* ---- HUD: player card | level, turn, dice | AI card ---- */
+
+.hud {
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(150px, 1fr) auto minmax(150px, 1fr);
+  gap: 20px;
+  align-items: center;
+}
+
+.hud-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+/* The turn banner takes the level badge's width (it adds none of its own) and wraps to two lines. */
+.hud-center .status {
+  width: 0;
+  min-width: 100%;
+}
+
+#col-human {
+  justify-self: start;
+}
+
+#col-ai {
+  justify-self: end;
 }
 
 .level-badge {
@@ -76,13 +107,13 @@ body {
 
 .status {
   margin: 0;
-  min-width: min(100%, 460px);
-  min-height: 3.4em;
+  min-height: 4.6em;
+  line-height: 1.5;
   padding: 12px 18px;
   display: grid;
   place-items: center;
   text-align: center;
-  font-size: clamp(12px, 2.4vw, 16px);
+  font-size: clamp(11px, 1.8vw, 14px);
   color: var(--ink);
   background: #fff;
   border: var(--border) solid var(--ink);
@@ -109,8 +140,14 @@ body {
   --cols: 6;
   display: grid;
   grid-template-columns: repeat(var(--cols), 1fr);
-  gap: clamp(6px, 1.2vw, 12px);
-  width: min(100%, calc(var(--cols) * 116px));
+  gap: clamp(6px, 1.2vw, 14px);
+  --rows: 3;
+  /* As wide as 124px cards allow, but short enough that every row fits on screen. */
+  width: min(
+    100%,
+    calc(var(--cols) * 124px + (var(--cols) - 1) * 14px),
+    max(60%, calc((100vh - 330px) * var(--cols) / var(--rows)))
+  );
 }
 
 .card {
@@ -203,19 +240,12 @@ body {
   border-color: var(--portal);
 }
 
-/* ---- Table: columns around the board ---- */
-
-.table {
-  width: 100%;
-  display: grid;
-  grid-template-columns: 150px 1fr 150px;
-  gap: 16px;
-  align-items: start;
-  justify-items: center;
-}
+/* ---- Player cards ---- */
 
 .column {
   width: 100%;
+  max-width: 220px;
+  align-self: stretch;
   padding: 12px;
   background: #fff;
   border: var(--border) solid var(--ink);
@@ -249,8 +279,8 @@ body {
 
 .pile {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 4px;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 3px;
   margin-top: 8px;
 }
 
@@ -281,7 +311,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
 }
 
 .dice-btn {
@@ -380,7 +410,7 @@ body {
 
 .dice-log {
   margin: 0;
-  font-size: 9px;
+  font-size: 12px;
   text-align: center;
 }
 
@@ -463,7 +493,19 @@ body {
   cursor: pointer;
 }
 
-.btn:active {
+.btn:disabled {
+  background: #cfcfcf;
+  color: #777;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+.hint {
+  font-size: 8px;
+  opacity: 0.7;
+}
+
+.btn:not(:disabled):active {
   transform: translate(2px, 2px);
   box-shadow: 2px 2px 0 #000;
 }
@@ -504,4 +546,86 @@ body {
 
 .credits a {
   color: var(--link);
+}
+
+/* ---- Result overlays ---- */
+
+.overlay .modal-body {
+  align-items: center;
+  text-align: center;
+}
+
+.result {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.result p {
+  margin: 0;
+  font-size: 10px;
+  line-height: 1.8;
+}
+
+.result h2 {
+  font-size: 16px;
+}
+
+.result-level {
+  color: var(--link);
+  text-transform: uppercase;
+}
+
+.result-human h2 {
+  color: var(--link);
+}
+
+.result-ai h2 {
+  color: #1f8fa0;
+}
+
+.final-score {
+  padding: 6px 10px;
+  background: var(--ink);
+  color: var(--yellow);
+}
+
+.trophy-spin {
+  width: 120px;
+  perspective: 500px;
+}
+
+.trophy-spin svg {
+  display: block;
+  width: 100%;
+  animation: spin 2.2s linear infinite, shine 1.1s steps(2, end) infinite;
+}
+
+.robot-cheer {
+  width: 120px;
+}
+
+.robot-cheer svg {
+  display: block;
+  width: 100%;
+  animation: cheer 700ms steps(2, end) infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotateY(360deg);
+  }
+}
+
+@keyframes shine {
+  50% {
+    filter: brightness(1.25) drop-shadow(0 0 6px #fff3a0);
+  }
+}
+
+@keyframes cheer {
+  50% {
+    transform: translateY(-8px);
+  }
 }

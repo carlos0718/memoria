@@ -15,7 +15,9 @@ export interface BoardDeps {
 
 export function mountBoard(container: HTMLElement, state: GameState, deps: BoardDeps): void {
   container.replaceChildren();
-  container.style.setProperty("--cols", String(LEVELS[state.level].desktopCols));
+  const cols = LEVELS[state.level].desktopCols;
+  container.style.setProperty("--cols", String(cols));
+  container.style.setProperty("--rows", String(Math.ceil(state.cards.length / cols)));
   const back = portalSvg();
   for (const card of state.cards) {
     const button = document.createElement("button");

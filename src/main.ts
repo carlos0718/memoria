@@ -1,7 +1,7 @@
 // Bootstrap and the only place with timers: engine → render wiring and the AI turn loop.
 import "./styles/main.css";
 import { chooseAiPick } from "./ai/aiPlayer";
-import { flip, hideMismatch, newGame, rollDice, setName } from "./game/engine";
+import { flip, gameWinner, hideMismatch, newGame, nextLevel, restart, rollDice, setName } from "./game/engine";
 import { LAST_LEVEL, LEVELS } from "./game/levels";
 import { randomSeed } from "./game/rng";
 import type { GameState, Player } from "./game/types";
@@ -10,10 +10,13 @@ import { mountBoard, updateBoard, type BoardDeps } from "./ui/board";
 import { mountColumn, updateColumn } from "./ui/columns";
 import { animateRoll, mountDice, updateDice } from "./ui/dice";
 import { hideHand, pointAt } from "./ui/hand";
-import { showWelcome } from "./ui/modals";
+import { showGameOver } from "./ui/effects";
+import { showLevelResult, showWelcome } from "./ui/modals";
 
-const AI_THINK_MS = 500;
-const AFTER_FLIP_MS = 450;
+// `?speed=fast` shortens every wait (for testing and for recording the demo).
+const SPEED = new URLSearchParams(location.search).get("speed") === "fast" ? 0.25 : 1;
+const AI_THINK_MS = 500 * SPEED;
+const AFTER_FLIP_MS = 450 * SPEED;
 
 const boardEl = document.querySelector<HTMLElement>("#board")!;
 const statusEl = document.querySelector<HTMLElement>("#status")!;
@@ -59,7 +62,7 @@ function render(): void {
   updateColumn(colEl.ai, "ai", state, deps);
   statusEl.textContent = statusText(state);
   statusEl.dataset.turn = state.phase === "aiTurn" || (state.phase === "revealMismatch" && state.turn === "ai") ? "ai" : state.phase === "dice" || state.phase === "welcome" ? "" : "human";
-  levelEl.textContent = `Level ${state.level} / ${LAST_LEVEL}`;
+  levelEl.textContent = `Level ${state.level} / ${LAST_LEVEL}  ·  ${state.name || "You"} ${state.levelWins.human} – ${state.levelWins.ai} AI`;
 }
 
 function setState(next: GameState): void {
@@ -72,11 +75,18 @@ function setState(next: GameState): void {
   render();
 
   if (state.phase === "revealMismatch") {
-    setTimeout(() => setState(hideMismatch(state)), LEVELS[state.level].revealMs);
+    setTimeout(() => setState(hideMismatch(state)), LEVELS[state.level].revealMs * SPEED);
   }
-  if (state.phase === "playerTurn") void pointAt(colEl.human.querySelector(".col-name")!);
+  if (state.phase === "levelEnd" && prev.phase !== "levelEnd") {
+    // Let the last pair land before the result pops up.
+    setTimeout(() => showLevelResult(state, () => void goNextLevel()), 700 * SPEED);
+  }
+  if (state.phase === "gameOver" && prev.phase !== "gameOver") {
+    showGameOver(state, gameWinner(state), () => void loadLevel(restart(state, randomSeed(), POOL_IDS)));
+  }
+  if (state.phase === "playerTurn") void pointAt(colEl.human.querySelector(".col-name")!, SPEED);
   if (state.phase === "aiTurn") void runAiTurn();
-  if (state.phase === "levelEnd" || state.phase === "dice") hideHand();
+  if (state.phase === "levelEnd" || state.phase === "dice" || state.phase === "gameOver") hideHand();
 }
 
 /** Plays the AI's picks one by one while it's still the AI's turn. */
@@ -84,12 +94,12 @@ async function runAiTurn(): Promise<void> {
   if (aiRunning) return;
   aiRunning = true;
   try {
-    await pointAt(colEl.ai.querySelector(".col-name")!);
+    await pointAt(colEl.ai.querySelector(".col-name")!, SPEED);
     while (state.phase === "aiTurn") {
       await sleep(AI_THINK_MS);
       const pick = await chooseAiPick(state);
       const cardEl = boardEl.children[pick.position];
-      if (cardEl) await pointAt(cardEl);
+      if (cardEl) await pointAt(cardEl, SPEED);
       setState(flip(state, pick.position, "ai"));
       await sleep(AFTER_FLIP_MS);
     }
@@ -106,11 +116,27 @@ async function roll(): Promise<void> {
   if (!thrown) return;
   rolling = true;
   try {
-    await animateRoll(diceEl, thrown);
+    await animateRoll(diceEl, thrown, SPEED);
   } finally {
     rolling = false;
   }
   setState(next);
+}
+
+/** Preloads the images a level needs, then rebuilds the board for it. */
+async function loadLevel(next: GameState): Promise<void> {
+  const ids = [...new Set(next.cards.map((c) => c.characterId))].filter((id) => !deps.images.has(id));
+  const loaded = await preloadImages(ids, deps.pool);
+  for (const [id, img] of loaded) deps.images.set(id, img);
+  lastEvent = null;
+  mountBoard(boardEl, next, deps);
+  setState(next);
+}
+
+async function goNextLevel(): Promise<void> {
+  const next = nextLevel(state, POOL_IDS);
+  if (next.phase === "gameOver") setState(next);
+  else await loadLevel(next);
 }
 
 async function start(): Promise<void> {
@@ -119,6 +145,7 @@ async function start(): Promise<void> {
   mountDice(diceEl, () => void roll());
   document.addEventListener("keydown", (e) => {
     if (state.phase !== "dice" || (e.key !== " " && e.key !== "Enter")) return;
+    if (document.querySelector("dialog[open]")) return;
     e.preventDefault();
     void roll();
   });

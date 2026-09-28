@@ -68,16 +68,17 @@ function dice(container: HTMLElement): Record<Player, HTMLElement> {
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /** Plays one throw. Resolves when both dice land. */
-export async function animateRoll(container: HTMLElement, roll: Record<Player, number>): Promise<void> {
+export async function animateRoll(container: HTMLElement, roll: Record<Player, number>, speed = 1): Promise<void> {
+  const ms = DICE_ROLL_MS * speed;
   const log = container.querySelector<HTMLElement>(".dice-log")!;
   const d = dice(container);
   container.classList.remove("is-waiting");
   container.classList.add("is-rolling");
   container.querySelector<HTMLButtonElement>(".dice-btn")!.disabled = true;
   log.textContent = "Rolling...";
-  land(d.human, roll.human, DICE_ROLL_MS);
-  land(d.ai, roll.ai, DICE_ROLL_MS);
-  await wait(DICE_ROLL_MS);
+  land(d.human, roll.human, ms);
+  land(d.ai, roll.ai, ms);
+  await wait(ms);
   container.classList.remove("is-rolling");
 }
 

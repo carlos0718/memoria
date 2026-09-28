@@ -27,7 +27,9 @@ export function updateColumn(container: HTMLElement, who: Player, state: GameSta
 
   const pile = container.querySelector<HTMLElement>(".pile")!;
   const ids = state.pairs[who];
-  if (pile.childElementCount === ids.length) return;
+  const key = ids.join(",");
+  if (pile.dataset.key === key) return;
+  pile.dataset.key = key;
   pile.replaceChildren(
     ...ids.map((id) => {
       const mini = document.createElement("div");

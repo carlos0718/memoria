@@ -2,7 +2,7 @@
 import { forget, observe } from "../ai/memory";
 import { buildDeck } from "./deck";
 import { throwDice } from "./dice";
-import { LEVELS } from "./levels";
+import { LAST_LEVEL, LEVELS } from "./levels";
 import { createRng, type RngState } from "./rng";
 import type { GameState, Level, Player } from "./types";
 
@@ -98,17 +98,37 @@ export function flip(state: GameState, position: number, by: Player): GameState 
     flipped.includes(c.position) ? { ...c, state: "matched" as const, matchedBy: by } : c,
   );
   const pairs = { ...state.pairs, [by]: [...state.pairs[by], a!.characterId] };
-  const levelOver = matched.every((c) => c.state === "matched");
+  const next: GameState = { ...state, cards: matched, flipped: [], pairs, aiMemory: forget(seenMemory, flipped), rng };
   // A match earns another turn: phase stays on the same player.
-  return {
-    ...state,
-    cards: matched,
-    flipped: [],
-    pairs,
-    aiMemory: forget(seenMemory, flipped),
-    rng,
-    phase: levelOver ? "levelEnd" : state.phase,
-  };
+  return matched.every((c) => c.state === "matched") ? scoreLevel(next) : next;
+}
+
+/** No cards left: more pairs wins the level (1 point); a tie scores nothing. */
+function scoreLevel(state: GameState): GameState {
+  const h = state.pairs.human.length;
+  const a = state.pairs.ai.length;
+  const result: Player | "tie" = h > a ? "human" : a > h ? "ai" : "tie";
+  const levelWins =
+    result === "tie" ? state.levelWins : { ...state.levelWins, [result]: state.levelWins[result] + 1 };
+  return { ...state, levelWins, lastLevelResult: result, phase: "levelEnd" };
+}
+
+/** After the level result: next level (new characters, dice again), or the final result after level 5. */
+export function nextLevel(state: GameState, poolIds: readonly number[]): GameState {
+  if (state.phase !== "levelEnd") return state;
+  if (state.level >= LAST_LEVEL) return { ...state, phase: "gameOver" };
+  return startLevel(state, (state.level + 1) as Level, poolIds);
+}
+
+export function gameWinner(state: GameState): Player | "tie" {
+  const { human, ai } = state.levelWins;
+  return human > ai ? "human" : ai > human ? "ai" : "tie";
+}
+
+/** Back to level 1, 0–0, same name, new seed (so new characters). */
+export function restart(state: GameState, seed: number, poolIds: readonly number[]): GameState {
+  const fresh = newGame(seed, poolIds);
+  return startLevel({ ...fresh, name: state.name, lastLevelResult: undefined }, 1, poolIds);
 }
 
 /** After the reveal time: flip the missed pair back down and pass the turn. */

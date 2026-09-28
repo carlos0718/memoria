@@ -84,6 +84,7 @@ graph LR
   ```
 - **Run the UI only (no key):** `npm run dev` → http://localhost:5173. `/api/ai-move` doesn't exist there, so the AI automatically uses the local rules player. The AI brain indicator shows "Rules".
 - **Force the rules player anywhere:** add `?ai=local` to the URL (useful for testing and as a demo safety net).
+- **Play faster:** add `?speed=fast` to shorten every wait to a quarter (dice, AI moves, reveal times). Useful for testing all 5 levels and for recording the demo (added in slice 3).
 - **Tests:** `npm test` (Vitest, no network: Jev and the Rick and Morty API are mocked).
 - **Submission:** a 1–3 min demo video (sped-up segments, levels 1 → 5) and the public GitHub repo with `devpost/scope.md`, `prd.md`, `spec.md`.
 - **Optional deployment (chosen):** Vercel, done by the learner in `6-ship` (`vercel` → preview, `vercel --prod` → public link, after adding `TYPESAFE_API_KEY` in the Vercel dashboard).
@@ -99,6 +100,8 @@ Carries forward `prd.md > Look and Feel`, with Rick and Morty characters replaci
 - **Card back:** a pixel portal swirl in green (CSS/inline SVG).
 - **Fallback tiles:** a big pixel number on a solid color from the palette, same size as a card.
 - **Signature details:** pixel pointing hand (inline SVG) that glides to the card the AI flips; spinning yellow trophy (CSS 3D rotation) with `canvas-confetti`; pixel robot holding the trophy (inline SVG).
+- **Desktop layout (slice 3 review):** a top HUD row with the player card on the left, the level badge + turn banner (same width as the badge, two lines) + dice in the centre, and the AI card on the right; the board below uses the full width, cards up to 124px, capped by viewport height so every row fits. Title "MemorIA" up to 48px.
+- **Welcome:** Start stays disabled until a non-blank name is typed (avoids the browser's localized validation message).
 - **Motion:** snappy 150–250 ms flips; the AI's hand takes ~600 ms per move so viewers can follow it.
 - **Copy:** all in English, short and playful ("Your turn!", "The AI found a pair!", "Level 3 — AI memory: sharper").
 - **Credit footer:** "Character images from The Rick and Morty API (rickandmortyapi.com). Rick and Morty © Adult Swim / Warner Bros. Discovery. Non-commercial fan project."

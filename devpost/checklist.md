@@ -29,7 +29,7 @@ Build mode: learn
   Learner check: Enter your name, roll the dice, and play a full level 1 against the AI. You should see the hand play for the AI, your clicks ignored on its turn, and the AI miss pairs you know it has already seen.
   Commit: `Add dice, turns, and a forgetful game AI for level 1`
 
-- [ ] **3. You play all 5 levels and the game crowns a winner**
+- [x] **3. You play all 5 levels and the game crowns a winner**
   Becomes usable: A level ends when no cards remain. The level result overlay shows win, loss, or tie, the level scoreboard updates (ties score nothing), and the next level starts with more cards, a shorter reveal time, and a sharper AI. After level 5: a spinning trophy with confetti, a robot holding the trophy, or a tie message, each with a restart. Restart resets to 0–0, keeps the name, and draws new characters.
   Why now: It completes the Core Journey and makes the kernel's level 1 vs level 5 contrast visible. It depends on slice 2's turns and AI.
   PRD ref: `prd.md > Levels`, `prd.md > Level Scoreboard and End of Game`, `prd.md > The Core Journey` (steps 6, 7)
@@ -91,3 +91,6 @@ Reflection:
 Activity mode:
 
 ## Revisions
+
+- Desktop layout moved the player and AI cards into a top HUD row beside the level/turn/dice stack, with the board full width below — the side columns squeezed the cards at higher levels (slice 3 review).
+- Dice throw once per press and a tie waits for another press, instead of auto re-rolling — the learner wanted more participation (slice 2 review).

@@ -17,14 +17,16 @@ function ensureHand(): HTMLElement {
 }
 
 /** Moves the fingertip to the centre of `target`. Resolves when the glide ends. */
-export function pointAt(target: Element): Promise<void> {
+export function pointAt(target: Element, speed = 1): Promise<void> {
   const el = ensureHand();
+  const ms = HAND_MOVE_MS * speed;
+  el.style.transitionDuration = `${ms}ms, 200ms`;
   const rect = target.getBoundingClientRect();
   const x = rect.left + rect.width / 2 + window.scrollX;
   const y = rect.top + rect.height / 2 + window.scrollY;
   el.style.transform = `translate(${x}px, ${y}px)`;
   el.classList.add("is-visible");
-  return new Promise((resolve) => setTimeout(resolve, HAND_MOVE_MS));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 export function hideHand(): void {
