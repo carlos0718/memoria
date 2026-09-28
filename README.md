@@ -13,6 +13,25 @@ The AI has two halves:
 
 It is not a chatbot: Jev only returns a typed choice with probabilities.
 
+### Reading the "AI brain" label
+
+The label in the AI's card shows who chose the AI's **last card**, and it updates on every flip.
+
+| Label | What it means |
+|---|---|
+| `AI brain: ...` | The AI hasn't flipped a card yet since the page loaded. |
+| `AI brain: Jev 62%` | Jev chose the card. The percentage is Jev's confidence in that choice. It is always 50% or higher, because anything lower is not used. |
+| `AI brain: Rules (Jev unsure 38%)` | Jev answered, but the answer wasn't used and the local rules player chose the card instead. Usually its confidence was under 50%. Rarely, it named a card that can't be flipped (already matched or face up), in which case this shows whatever confidence Jev gave. |
+| `AI brain: Rules` | Jev wasn't asked, or no answer came back. The possible reasons: the game is running under `npm run dev` (no server function) or with `?ai=local`, there's no API key on the server, or Jev took longer than 3 seconds or returned an error. |
+
+What to expect while playing:
+
+- **First card of a turn:** usually `Rules (Jev unsure …)`. Picking blind is close to a guess, and Jev's low confidence says so.
+- **Second card, when the AI remembers the partner:** usually `Jev` with a high confidence (80% or more), because the right answer is clear.
+- **When Jev is missing vs. when it hiccups:** if the endpoint doesn't exist or the server has no key, the game stops asking Jev until the page is reloaded, and every move shows `Rules`. A slow answer or any other error affects only that one move, and the next move asks Jev again.
+
+The rules player never breaks the game. Whether Jev is on or off, you always get a working opponent with the same imperfect memory.
+
 ## Run it
 
 Requirements: Node.js 20+ and npm.
