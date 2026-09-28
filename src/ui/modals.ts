@@ -71,7 +71,7 @@ export function escapeHtml(text: string): string {
 
 export function showWelcome(onStart: (name: string) => void): void {
   const dialog = document.createElement("dialog");
-  dialog.className = "modal";
+  dialog.className = "modal welcome";
   dialog.innerHTML = `
     <form method="dialog" class="modal-body">
       <h2>Welcome to Memor<span class="ia">IA</span></h2>

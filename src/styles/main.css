@@ -505,6 +505,28 @@ body {
   opacity: 0.7;
 }
 
+/* Welcome modal: larger type so the rules and the name field read easily. */
+.welcome h2 {
+  font-size: 20px;
+}
+
+.welcome .rules,
+.welcome .field {
+  font-size: 13px;
+}
+
+.welcome .field input {
+  font-size: 16px;
+}
+
+.welcome .hint {
+  font-size: 10px;
+}
+
+.welcome .btn {
+  font-size: 14px;
+}
+
 .btn:not(:disabled):active {
   transform: translate(2px, 2px);
   box-shadow: 2px 2px 0 #000;
