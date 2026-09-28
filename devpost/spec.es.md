@@ -30,7 +30,7 @@ Ref. PRD: `prd.md > The Core Journey`.
 1. **Abre la página** → `main.ts` carga lo guardado desde `localStorage` (`services/storage.ts`) y, en paralelo, trae el grupo de personajes (`services/characters.ts`) en una sola petición.
 2. **Sin partida guardada** → el modal de bienvenida (`ui/modals.ts`) pide el nombre. **Con partida guardada** → salta directo a la fase guardada con el tablero exacto.
 3. **Empieza el nivel** → `game/deck.ts` sortea los personajes del nivel entre los del grupo, arma las cartas (cada personaje dos veces) y las mezcla con el RNG con semilla. `characters.ts` precarga esas imágenes con `Promise.allSettled`. El tablero se dibuja boca abajo (`ui/board.ts`).
-4. **Dados** → el jugador aprieta Espacio/Enter (o toca). `game/dice.ts` tira los dos dados y, si empatan, vuelve a tirar. El número más alto empieza.
+4. **Dados** → el jugador aprieta Espacio/Enter (o toca). `game/dice.ts` tira los dos dados y, si empatan, el jugador vuelve a tirar. El número más alto empieza.
 5. **Turno del jugador** → los clics van a `game/engine.ts`, que da vuelta las cartas, revisa el par, manda los pares acertados a la columna del jugador o arranca el temporizador del par fallado (de 5 s a 3 s según el nivel). Cada carta que se da vuelta también se le informa a `ai/memory.ts`, que decide si la IA la recuerda.
 6. **Turno de la IA** → `ai/aiPlayer.ts` arma la vista de "lo que recuerdo", le pide a `services/jevClient.ts` (→ `/api/ai-move` → Jev) la primera carta, la da vuelta y vuelve a preguntar por la segunda. Cada respuesta se valida. Si falla, decide el jugador local de reglas (`ai/localPolicy.ts`). La manito (`ui/hand.ts`) se mueve hasta cada carta elegida antes de darla vuelta. Durante esta fase se ignoran los clics en el tablero.
 7. **Después de cada cambio** → el motor emite el nuevo estado, la UI se vuelve a dibujar y `storage.ts` lo guarda.
@@ -116,20 +116,20 @@ Ref. PRD: `prd.md > Levels`.
 
 | Nivel | Cartas | Tiempo de muestra | Probabilidad de recordar de la IA | Grilla escritorio | Grilla celular |
 |---|---|---|---|---|---|
-| 1 | 12 | 5 s | 0,20 | 6×2 | 4×3 |
-| 2 | 16 | 4,5 s | 0,40 | 8×2 | 4×4 |
+| 1 | 12 | 5 s | 0,20 | 4×3 | 4×3 |
+| 2 | 16 | 4,5 s | 0,40 | 4×4 | 4×4 |
 | 3 | 20 | 4 s | 0,60 | 5×4 | 4×5 |
 | 4 | 24 | 3,5 s | 0,80 | 6×4 | 4×6 |
 | 5 | 28 | 3 s | 0,95 | 7×4 | 4×7 |
 
-Las probabilidades son una propuesta inicial que se ajusta durante el build con el test del núcleo (ver **Verificación**).
+Las probabilidades son una propuesta inicial que se ajusta durante el build con el test del núcleo (ver **Verificación**). Las grillas de escritorio de los niveles 1 y 2 pasaron de 6×2 / 8×2 a 4×3 / 4×4 en la revisión del slice 2.
 
 ### Mazo y RNG (`game/deck.ts`, `game/rng.ts`)
 `rng.ts` es un generador chico con semilla (mulberry32). Su semilla y su estado interno viven en el estado del juego, así que al recargar sigue la misma secuencia. Una partida nueva o un reinicio reciben una semilla nueva (`crypto.getRandomValues`). `deck.ts` sortea N personajes distintos del grupo para el nivel (N = pares), los duplica y los mezcla con Fisher–Yates usando el RNG. Si cargaron menos personajes de los necesarios, las cartas de respaldo completan lo que falta.
 Ref. PRD: `prd.md > Levels` ("each character appears exactly twice, shuffled"; "characters vary between games").
 
 ### Dados (`game/dice.ts`)
-Tira de 1 a 6 para los dos jugadores con el RNG y repite si empatan. Devuelve todas las tiradas para que la UI pueda mostrar la repetición.
+Una tirada por cada vez que se aprieta: de 1 a 6 para los dos jugadores con el RNG. Si empatan, la fase sigue en `dice` y el jugador vuelve a tirar apretando otra vez (cambiado en la revisión del slice 2 para dar más participación). Cada tirada queda en `dice.rolls`; `starter` se define en la primera que no es empate.
 Ref. PRD: `prd.md > Dice Roll`.
 
 ### Memoria de la IA: el núcleo (`ai/memory.ts`)
@@ -163,7 +163,7 @@ Dibuja a partir del estado; no contiene reglas del juego.
 - `modals.ts`: bienvenida (nombre obligatorio más instrucciones), modal de detalles del jugador en celular y capas de resultado. Ref. PRD: `prd.md > Welcome and Instructions`, `prd.md > Screens and Layout`.
 - `board.ts`: la grilla, la animación de vuelta y el manejo de clics/toques (se ignoran si no es el turno del jugador). Usa `pixelate.ts` para dibujar las caras.
 - `columns.ts`: las columnas del jugador y la IA (nombre, pares de este nivel, niveles ganados), el indicador de nivel, el marcador de niveles y el indicador del cerebro de la IA ("AI brain: Jev 82%" o "AI brain: Rules"). En celular: nombres y niveles ganados arriba, y un toque abre los detalles.
-- `dice.ts`: los dados en pantalla, Espacio/Enter/toque para tirar y la animación de repetición.
+- `dice.ts`: dos dados 3D con puntos; Espacio/Enter/toque para tirar. Cada tirada gira y frena durante `DICE_ROLL_MS` (3 s) antes de aplicar el resultado, y las tiradas empatadas se muestran (agregado en la revisión del slice 2). El motor decide el resultado al instante; solo la UI espera.
 - `hand.ts`: el indicador de turno; en el turno de la IA se desliza hasta cada carta elegida antes de darla vuelta.
 - `effects.ts`: trofeo con confeti, robot con el trofeo y mensaje de empate.
 - `pixelate.ts`: imagen → canvas de 64×64 → agrandada, o la carta de respaldo.

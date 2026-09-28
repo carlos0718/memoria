@@ -19,7 +19,7 @@ Build mode: learn
   Learner check: Run `npm run dev`, open http://localhost:5173, flip cards until you find a pair and miss one. Faces should look pixelated and retro, and a missed pair should flip back after about 5 seconds. Reload and notice the characters change.
   Commit: `Add retro board with Rick and Morty cards and pair matching`
 
-- [ ] **2. You play level 1 against an AI that forgets**
+- [x] **2. You play level 1 against an AI that forgets**
   Becomes usable: The welcome modal asks for your name and explains the game. Dice decide who starts (Space/Enter/tap, re-roll on ties). Turns alternate: a match earns another turn, a miss passes it. On the AI's turn the pointing hand glides to each card and flips it, the board ignores your clicks, and the AI sometimes forgets cards it has seen. Pairs pile up in each player's column.
   Why now: This is the unique kernel. It goes right after the board so the memory curve is tested and felt before anything is built around it. It uses the local rules player, so it needs no Jev key.
   PRD ref: `prd.md > Welcome and Instructions`, `prd.md > Dice Roll`, `prd.md > Turns and Pairs`, `prd.md > The Game AI (the Kernel)`
@@ -71,7 +71,7 @@ Build mode: learn
 
 ## Hands-on Checkpoints
 
-- [ ] Early usable behavior explored — after slice 2 (a full level 1 against the forgetful AI; feedback can still shape levels, look, and pacing)
+- [x] Early usable behavior explored — after slice 2 (a full level 1 against the forgetful AI; feedback can still shape levels, look, and pacing)
 - [ ] Final kick-the-tires exploration and feedback completed
 
 ## Final Review

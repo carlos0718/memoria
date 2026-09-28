@@ -32,7 +32,8 @@ export interface GameState {
   pairs: Record<Player, number[]>;
   levelWins: Record<Player, number>;
   lastLevelResult?: Player | "tie";
-  dice?: { rolls: Array<Record<Player, number>>; starter: Player };
+  /** Every throw this level; starter is set once a throw isn't a tie. */
+  dice?: { rolls: Array<Record<Player, number>>; starter?: Player };
   turn: Player;
   /** position → characterId the AI remembers. */
   aiMemory: Record<number, number>;

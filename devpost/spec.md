@@ -30,7 +30,7 @@ PRD ref: `prd.md > The Core Journey`.
 1. **Open the page** → `main.ts` loads the save from `localStorage` (`services/storage.ts`) and, in parallel, fetches the character pool (`services/characters.ts`) in one request.
 2. **No save** → the welcome modal (`ui/modals.ts`) asks for the name. **Save found** → skip to the saved phase with the exact board.
 3. **Level starts** → `game/deck.ts` draws the level's characters at random from the pool, builds the cards (each character twice), and shuffles them with the seeded RNG. `characters.ts` preloads those images with `Promise.allSettled`. The board renders face down (`ui/board.ts`).
-4. **Dice** → the player presses Space/Enter (or taps). `game/dice.ts` rolls both dice; on a tie it rolls again. The higher roll gets the first turn.
+4. **Dice** → the player presses Space/Enter (or taps). `game/dice.ts` throws both dice; on a tie the player presses again. The higher roll gets the first turn.
 5. **Player's turn** → clicks go to `game/engine.ts`, which flips cards, checks the pair, moves matched pairs to the player's column, or starts the mismatch timer (5 s → 3 s by level). Every flip is also reported to `ai/memory.ts`, which decides whether the AI remembers that card.
 6. **AI's turn** → `ai/aiPlayer.ts` builds the "what I remember" view, asks `services/jevClient.ts` (→ `/api/ai-move` → Jev) for the first card, flips it, then asks again for the second. Each answer is validated. If it fails, the local rules player (`ai/localPolicy.ts`) decides. The pointing hand (`ui/hand.ts`) moves to each chosen card before it flips. Board clicks are ignored during this phase.
 7. **After every change** → the engine emits the new state, the UI re-renders, and `storage.ts` saves it.
@@ -116,20 +116,20 @@ PRD ref: `prd.md > Levels`.
 
 | Level | Cards | Reveal time | AI remember probability | Desktop grid | Phone grid |
 |---|---|---|---|---|---|
-| 1 | 12 | 5 s | 0.20 | 6×2 | 4×3 |
-| 2 | 16 | 4.5 s | 0.40 | 8×2 | 4×4 |
+| 1 | 12 | 5 s | 0.20 | 4×3 | 4×3 |
+| 2 | 16 | 4.5 s | 0.40 | 4×4 | 4×4 |
 | 3 | 20 | 4 s | 0.60 | 5×4 | 4×5 |
 | 4 | 24 | 3.5 s | 0.80 | 6×4 | 4×6 |
 | 5 | 28 | 3 s | 0.95 | 7×4 | 4×7 |
 
-The probabilities are a starting proposal, tuned during the build against the kernel test (see **Verification**).
+The probabilities are a starting proposal, tuned during the build against the kernel test (see **Verification**). Desktop grids for levels 1–2 changed from 6×2 / 8×2 to 4×3 / 4×4 at the slice 2 review.
 
 ### Deck and RNG (`game/deck.ts`, `game/rng.ts`)
 `rng.ts` is a small seeded generator (mulberry32). Its seed and internal state live in the game state, so a reload continues the same sequence. A new game or restart gets a fresh seed (`crypto.getRandomValues`). `deck.ts` draws N distinct characters at random from the pool for the level (N = pairs), duplicates them, and Fisher–Yates shuffles them with the RNG. If fewer pool characters loaded than needed, fallback tiles fill the gap.
 PRD ref: `prd.md > Levels` ("each character appears exactly twice, shuffled"; "characters vary between games").
 
 ### Dice (`game/dice.ts`)
-Rolls 1–6 for both players with the RNG and repeats on ties. Returns every roll so the UI can show a re-roll.
+One throw per press: 1–6 for both players with the RNG. A tie keeps the phase in `dice` and the player throws again with another press (changed at the slice 2 review for more participation). Every throw is kept in `dice.rolls`; `starter` is set on the first non-tie.
 PRD ref: `prd.md > Dice Roll`.
 
 ### AI Memory — the Kernel (`ai/memory.ts`)
@@ -163,7 +163,7 @@ Renders from the state; it holds no game rules.
 - `modals.ts`: welcome (name required plus instructions), phone player-details modal, and result overlays. PRD ref: `prd.md > Welcome and Instructions`, `prd.md > Screens and Layout`.
 - `board.ts`: the grid, flip animation, and click/tap handling (ignored unless it's the player's turn). Uses `pixelate.ts` to draw faces.
 - `columns.ts`: the player/AI columns (name, pairs this level, levels won), the level indicator, the level scoreboard, and the AI brain indicator ("AI brain: Jev 82%" or "AI brain: Rules"). On phone: names and level wins on top, tap to open details.
-- `dice.ts`: the dice display, Space/Enter/tap to roll, and the re-roll animation.
+- `dice.ts`: two 3D pip dice; Space/Enter/tap to roll. Each throw tumbles and eases out for `DICE_ROLL_MS` (3 s) before the result applies, and tie throws are replayed (added at the slice 2 review). The engine decides the result instantly; only the UI waits.
 - `hand.ts`: the turn pointer; during the AI's turn it glides to each chosen card before the flip.
 - `effects.ts`: the trophy with confetti, the robot with the trophy, and the tie message.
 - `pixelate.ts`: image → 64×64 canvas → scaled up, or the fallback tile.

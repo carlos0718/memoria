@@ -2,6 +2,34 @@
 
 const PORTAL_COLORS = ["#97ce4c", "#5fa83a", "#c8f07a"];
 
+// Rows of a 12×12 pointing hand (index finger up-left). "#" = outline, "o" = fill.
+const HAND = [
+  "..##........",
+  ".#oo#.......",
+  ".#oo#.......",
+  ".#oo###.....",
+  ".#oo#oo##...",
+  ".#oo#oo#o##.",
+  "##oooooooo#.",
+  "#ooooooooo#.",
+  "#ooooooooo#.",
+  ".#ooooooo#..",
+  "..#ooooo#...",
+  "...#####....",
+];
+
+/** Pixel pointing hand, fingertip at the top-left corner. */
+export function handSvg(): string {
+  let rects = "";
+  HAND.forEach((row, y) => {
+    [...row].forEach((ch, x) => {
+      if (ch === ".") return;
+      rects += `<rect x="${x}" y="${y}" width="1" height="1" fill="${ch === "#" ? "#000" : "#fff"}"/>`;
+    });
+  });
+  return `<svg viewBox="0 0 12 12" shape-rendering="crispEdges" aria-hidden="true">${rects}</svg>`;
+}
+
 /** 16×16 pixel portal swirl for the card back. */
 export function portalSvg(): string {
   const size = 16;
