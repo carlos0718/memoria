@@ -59,8 +59,7 @@ Build mode: learn
   Learner check: Open the dev server on your phone (or devtools at 360 px), play into level 5, and tap a name to see the details modal. Nothing should need horizontal scrolling.
   Commit: `Make the game responsive for phones`
 
-- [ ] **6. Jev chooses the AI's moves, with a safe fallback**
-  Status: built, unit-tested, and live Jev calls verified; committed before the folder rename. Pending: `vercel link` (project `memoria`), uploading `TYPESAFE_API_KEY` to Vercel (awaiting learner confirmation), and the learner check under `vercel dev`.
+- [x] **6. Jev chooses the AI's moves, with a safe fallback**
   Becomes usable: Under `vercel dev` with a TypeSafe key, the AI's picks come from Jev. The AI brain indicator shows "Jev 82%", or "Rules" when Jev is slow, fails, answers invalidly, or isn't confident. Without a key, or with `?ai=local`, the game plays exactly as before.
   Why now: Jev is the highest external risk, but the key isn't available yet. Slices 1–5 don't depend on it because the AI Player already has the fallback interface, so this goes last and the game is complete either way.
   PRD ref: `prd.md > The Game AI (the Kernel)`
@@ -98,3 +97,7 @@ Activity mode:
 - The game ends early once decided (best of 5), instead of always playing all 5 levels — the learner noticed a 3–1 lead after level 4 made level 5 pointless. Tradeoff accepted: a lopsided game may never reach the level-5 AI, so the demo recording should use a close game.
 - Jev option descriptions now spell out what the AI's memory implies for each card, instead of only "remembered: character N" — live calls showed Jev picked the remembered partner at 81% with bare labels and 98% with explicit ones; first-card picks stay low-confidence and go to the rules player via the 0.5 gate.
 - Real Jev calls were verified by running the actual `api/ai-move.ts` handler through Vite's SSR loader with the key from `.env.local`, because the Vercel CLI isn't logged in on this machine; `vercel dev` end to end is left to the learner check.
+- The learner linked the Vercel project `memoria` and uploaded `TYPESAFE_API_KEY` themselves. On the deployed app the AI brain label showed "Jev 62%", and `?ai=local` kept the game playing on Rules (slice 6 learner check).
+- The Vercel build logs TS2688 for the `node` and `vite/client` types while compiling `api/ai-move.ts`. It's a non-blocking type check, the build completes, and Jev works in production. Left as is.
+- The per-deployment URLs asked visitors to log in (Vercel Deployment Protection). The public production domain is the one to share.
+- Welcome modal text enlarged (the name field is 16px, which also stops the iPhone from zooming in), and the README now explains the AI brain label states and the memory chance per level (learner feedback during the slice 6 check).
