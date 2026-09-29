@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MemorIA App Map</title>
+<style>
+  :root {
+    --bg: #fbf8f1; --panel: #ffffff; --ink: #1d1b26; --muted: #5d5a68;
+    --line: #d9d4c7; --accent: #1f8a9e; --accent-soft: #e2f3f6; --warn: #b3541e;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #15141b; --panel: #1f1e27; --ink: #ecebf2; --muted: #a8a5b5;
+      --line: #3a3847; --accent: #5fcadb; --accent-soft: #1c3338; --warn: #f0a070;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 16px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  main { max-width: 820px; margin: 0 auto; padding: 32px 16px 64px; }
+  h1 { margin: 0 0 4px; font-size: 28px; }
+  h2 { margin: 40px 0 12px; font-size: 20px; }
+  p.lede { margin: 0 0 8px; color: var(--muted); }
+  code { font: 14px/1.4 ui-monospace, Consolas, monospace; background: var(--accent-soft); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; margin: 12px 0; }
+  .stop-num { display: inline-block; min-width: 28px; height: 28px; line-height: 28px; text-align: center; border-radius: 50%; background: var(--accent); color: var(--bg); font-weight: 700; margin-right: 8px; }
+  .stop h3 { margin: 0 0 6px; font-size: 17px; }
+  .stop p { margin: 6px 0 0; }
+  ul { padding-left: 20px; }
+  li { margin: 6px 0; }
+  svg { width: 100%; height: auto; display: block; }
+  svg text { fill: var(--ink); font: 13px system-ui, sans-serif; }
+  svg .sub { fill: var(--muted); font-size: 11px; }
+  svg .box { fill: var(--panel); stroke: var(--line); stroke-width: 1.5; }
+  svg .kernel { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 2; }
+  svg .arrow { stroke: var(--accent); stroke-width: 2; fill: none; marker-end: url(#head); }
+  svg .fallback { stroke: var(--warn); stroke-width: 2; fill: none; stroke-dasharray: 5 4; marker-end: url(#headw); }
+  svg .warn { fill: var(--warn); font-size: 11px; }
+  details { margin-top: 10px; }
+  summary { cursor: pointer; color: var(--accent); }
+  summary:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  pre { background: var(--accent-soft); padding: 12px; border-radius: 8px; overflow-x: auto; margin: 8px 0 0; }
+  pre code { background: none; padding: 0; }
+  footer { margin-top: 48px; color: var(--muted); font-size: 14px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>MemorIA App Map</h1>
+  <p class="lede">A take-home guide to where things live in this project. It's a snapshot of commit <code>c572924</code>, so it can drift as the code changes.</p>
+
+  <h2>What the app is</h2>
+  <p>A retro memory card game with Rick and Morty characters. You play up to 5 levels against a game AI that only remembers the cards it has seen, and remembers more each level (20% at level 1, 95% at level 5). On each AI move, Jev (TypeSafe) picks the card and reports its confidence. If Jev is unsure, slow, or missing, a local rules player decides, so the game never breaks.</p>
+  <p>The main pieces:</p>
+  <ul>
+    <li><strong>Game engine</strong> (<code>src/game/</code>): the pure rules for turns, pairs, levels, and scoring. It has no screen code.</li>
+    <li><strong>AI</strong> (<code>src/ai/</code>): the imperfect memory (the kernel), the rules player, and the code that asks Jev.</li>
+    <li><strong>Server function</strong> (<code>api/</code>): runs on Vercel, holds the TypeSafe key, and calls Jev.</li>
+    <li><strong>Screen</strong> (<code>src/ui/</code> + <code>src/main.ts</code>): draws the board, the pointing hand, and the modals, and runs the turn loop.</li>
+    <li><strong>Services</strong> (<code>src/services/</code>): character images, saving the game in the browser, and the Jev client.</li>
+  </ul>
+
+  <h2>One action, end to end: the AI flips a card</h2>
+  <div class="card">
+    <svg viewBox="0 0 760 330" role="img" aria-labelledby="dtitle">
+      <title id="dtitle">When it's the AI's turn, main.ts asks aiPlayer for a pick. aiPlayer builds the remembered view and asks Jev through jevClient and the server function. A confident, valid answer is used; otherwise the local rules player picks. The engine flips the card, and the AI memory observes it.</title>
+      <defs>
+        <marker id="head" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#1f8a9e"/></marker>
+        <marker id="headw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#b3541e"/></marker>
+      </defs>
+      <rect class="box" x="10" y="20" width="170" height="60" rx="8"/>
+      <text x="22" y="45">1. AI's turn starts</text>
+      <text class="sub" x="22" y="64">main.ts · runAiTurn</text>
+
+      <rect class="box" x="230" y="20" width="200" height="60" rx="8"/>
+      <text x="242" y="45">2. What do I remember?</text>
+      <text class="sub" x="242" y="64">aiPlayer.ts · chooseAiPick</text>
+
+      <rect class="box" x="480" y="20" width="270" height="60" rx="8"/>
+      <text x="492" y="45">3. Ask Jev (3 s timeout)</text>
+      <text class="sub" x="492" y="64">jevClient.ts → api/ai-move.ts</text>
+
+      <rect class="box" x="480" y="130" width="270" height="60" rx="8"/>
+      <text x="492" y="155">4. Confident (≥ 50%) and valid?</text>
+      <text class="sub" x="492" y="174">yes → "Jev 82%"</text>
+
+      <rect class="box" x="230" y="130" width="200" height="60" rx="8"/>
+      <text x="242" y="155">Rules player picks</text>
+      <text class="sub" x="242" y="174">localPolicy.ts · localPick</text>
+
+      <rect class="box" x="480" y="250" width="270" height="60" rx="8"/>
+      <text x="492" y="275">5. Card flips on screen</text>
+      <text class="sub" x="492" y="294">engine.ts · flip</text>
+
+      <rect class="kernel" x="10" y="250" width="420" height="60" rx="8"/>
+      <text x="22" y="275">6. The AI sees the card and maybe remembers it (the kernel)</text>
+      <text class="sub" x="22" y="294">memory.ts · observe, with the level's aiRemember chance</text>
+
+      <path class="arrow" d="M180,50 L226,50"/>
+      <path class="arrow" d="M430,50 L476,50"/>
+      <path class="arrow" d="M615,80 L615,126"/>
+      <path class="arrow" d="M615,190 L615,246"/>
+      <path class="fallback" d="M480,160 L434,160"/>
+      <text class="warn" x="436" y="122">no / slow / error</text>
+      <path class="fallback" d="M330,190 Q330,280 476,280"/>
+      <path class="arrow" d="M480,295 L434,295"/>
+    </svg>
+  </div>
+
+  <h2>Reference route: 3 stops</h2>
+  <p>Follow these in your editor to see how the "AI brain" label connects to the code. This is a reference route; it wasn't toured step by step during the build.</p>
+
+  <div class="card stop">
+    <h3><span class="stop-num">1</span>The turn loop</h3>
+    <p><code>src/main.ts</code>, search for <code>runAiTurn</code>. While it's the AI's turn, this loop asks for a pick, updates the "AI brain" label with <code>setBrain</code>, moves the hand to the card, and flips it. Jev is asked while the AI "thinks", so Jev's delay doesn't add to the wait.</p>
+  </div>
+
+  <div class="card stop">
+    <h3><span class="stop-num">2</span>The decision and the safety net</h3>
+    <p><code>src/ai/aiPlayer.ts</code>, search for <code>buildView</code> and <code>chooseAiPick</code>. <code>buildView</code> collects only what the AI remembers, so Jev never sees the whole board. <code>chooseAiPick</code> asks Jev and uses the answer only if the card can be flipped and the confidence is at least <code>MIN_CONFIDENCE</code> (0.5). Otherwise the rules player picks.</p>
+    <details>
+      <summary>See the gate</summary>
+<pre><code>const valid = view.faceDown.includes(move.position);
+if (!valid || move.confidence &lt; MIN_CONFIDENCE) return rules(move.confidence);
+return { position: move.position, source: &quot;jev&quot;, confidence: move.confidence };</code></pre>
+    </details>
+  </div>
+
+  <div class="card stop">
+    <h3><span class="stop-num">3</span>The imperfect memory (the kernel)</h3>
+    <p><code>src/ai/memory.ts</code>, search for <code>observe</code>, which is called from <code>flip</code> in <code>src/game/engine.ts</code>. Every flipped card, yours or the AI's, gets a random roll. The AI keeps it only if the roll is below the level's <code>aiRemember</code> value in <code>src/game/levels.ts</code>.</p>
+  </div>
+
+  <h2>To change this, start here</h2>
+  <ul>
+    <li><strong>How well the AI remembers each level:</strong> <code>aiRemember</code> in <code>src/game/levels.ts</code>. Then run <code>npm test</code>, because <code>src/ai/kernel.test.ts</code> checks the level 1 vs level 5 contrast.</li>
+    <li><strong>Cards per level or reveal time:</strong> <code>cards</code>, <code>pairs</code>, and <code>revealMs</code> in <code>src/game/levels.ts</code>.</li>
+    <li><strong>When Jev's answer is trusted:</strong> <code>MIN_CONFIDENCE</code> in <code>src/ai/aiPlayer.ts</code>, and <code>JEV_TIMEOUT_MS</code> in <code>src/services/jevClient.ts</code>.</li>
+    <li><strong>What Jev is asked:</strong> <code>buildJevRequest</code> in <code>api/_lib/jev.ts</code>.</li>
+    <li><strong>The "AI brain" label text:</strong> <code>setBrain</code> in <code>src/ui/columns.ts</code>.</li>
+    <li><strong>Welcome modal text and look:</strong> <code>showWelcome</code> in <code>src/ui/modals.ts</code>, and the <code>.welcome</code> rules in <code>src/styles/main.css</code>.</li>
+    <li><strong>Colors, font, and borders:</strong> the variables at the top of <code>src/styles/main.css</code>.</li>
+  </ul>
+
+  <h2>A practice to reuse</h2>
+  <div class="card">
+    <p><strong>Treat an AI model's answer as a suggestion to check, not a command to follow.</strong> Jev's choice goes through two checks before it's used: can this card actually be flipped, and is the confidence at least 50%? A timeout, an error, or a missing key sends the move to a plain rules player. The evidence is in <code>src/ai/aiPlayer.test.ts</code>, whose tests cover the confident answer, low confidence, an invalid position, an error or timeout, and an unavailable endpoint. In play, the "AI brain" label shows which path each move took.</p>
+    <p>The same approach works in any project that calls an AI model: validate the answer against what's actually possible, set a confidence or quality threshold, keep a simple fallback that always works, write a test for each failure path, and make visible which path was taken.</p>
+  </div>
+
+  <h2>Run it again</h2>
+<pre><code>npm install
+npm run dev        # http://localhost:5173, rules player only
+npm run dev:full   # vercel dev, http://localhost:3000, with Jev (needs TYPESAFE_API_KEY)
+npm test           # 81 tests, no network</code></pre>
+
+  <footer>Generated from the code at commit <code>c572924</code>. If the code has changed since then, trust the code over this page.</footer>
+</main>
+</body>
+</html>

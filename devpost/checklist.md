@@ -72,23 +72,23 @@ Build mode: learn
 ## Hands-on Checkpoints
 
 - [x] Early usable behavior explored — after slice 2 (a full level 1 against the forgetful AI; feedback can still shape levels, look, and pacing)
-- [ ] Final kick-the-tires exploration and feedback completed
+- [x] Final kick-the-tires exploration and feedback completed — the learner played the deployed build (Jev on, then `?ai=local`), asked for a larger welcome modal text and README explanations of the AI brain label and memory, and both were done
 
 ## Final Review
 
-- [ ] Final review complete — feedback resolved and learner confirms ready to ship
+- [x] Final review complete — feedback resolved and learner confirms ready to ship (tests 81/81 and production build pass; the learner said it's fine as is for 6-ship)
 
 ## Code Tour and App Map
 
-- [ ] Learning activity complete — guided route, focused alternative, prior practice connected, or brief recap
-- [ ] Optional edit and transfer reflection addressed — offered/declined/already covered/not applicable as appropriate
-- [ ] `devpost/app-map.html` generated from finished code, checked, and shown, including a project-grounded practice to reuse
+- [x] Learning activity complete — guided route, focused alternative, prior practice connected, or brief recap
+- [x] Optional edit and transfer reflection addressed — offered/declined/already covered/not applicable as appropriate
+- [x] `devpost/app-map.html` generated from finished code, checked, and shown, including a project-grounded practice to reuse
 
-Activity and evidence:
-Route and stops:
-Edit outcome:
-Reflection:
-Activity mode:
+Activity and evidence: Prior practice connected. The learner's goal was to understand how AI agents work and to build something reliable. During the slice 6 check they asked what "AI brain: Jev 62%" means and whether the AI looks at cards or remembers them. The answers were traced to `chooseAiPick`/`MIN_CONFIDENCE` in `src/ai/aiPlayer.ts`, `observe` in `src/ai/memory.ts` (called from `flip` in `src/game/engine.ts`), and `aiRemember` in `src/game/levels.ts`, and the learner had both written into the README. Takeaway: validate a model's answer, gate it on confidence, and keep a fallback that always works (evidence: `src/ai/aiPlayer.test.ts`).
+Route and stops: Reference route in the app map (`runAiTurn` → `chooseAiPick` → `observe`); not toured step by step.
+Edit outcome: Covered by the learner's own requested change (larger welcome modal text, commit `095269d`); no extra edit.
+Reflection: Transfer question offered at hand-off.
+Activity mode: Prior practice connected + app map.
 
 ## Revisions
 
