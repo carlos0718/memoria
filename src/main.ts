@@ -16,8 +16,10 @@ import { showLevelResult, showPlayerDetails, showWelcome } from "./ui/modals";
 
 // `?speed=fast` shortens every wait (for testing and for recording the demo).
 const SPEED = new URLSearchParams(location.search).get("speed") === "fast" ? 0.25 : 1;
-const AI_THINK_MS = 500 * SPEED;
-const AFTER_FLIP_MS = 450 * SPEED;
+/** The "AI speed" button makes only the AI's turn faster (thinking, hand, pause after a flip). */
+const AI_FAST = 0.25;
+let aiFast = false;
+const aiSpeed = () => SPEED * (aiFast ? AI_FAST : 1);
 
 const boardEl = document.querySelector<HTMLElement>("#board")!;
 const statusEl = document.querySelector<HTMLElement>("#status")!;
@@ -104,15 +106,15 @@ async function runAiTurn(): Promise<void> {
   if (aiRunning) return;
   aiRunning = true;
   try {
-    await pointAt(colEl.ai.querySelector(".col-name")!, SPEED);
+    await pointAt(colEl.ai.querySelector(".col-name")!, aiSpeed());
     while (state.phase === "aiTurn") {
       // Ask Jev while the AI "thinks", so its latency doesn't add to the wait.
-      const [pick] = await Promise.all([chooseAiPick(state), sleep(AI_THINK_MS)]);
+      const [pick] = await Promise.all([chooseAiPick(state), sleep(500 * aiSpeed())]);
       setBrain(colEl.ai, pick);
       const cardEl = boardEl.children[pick.position];
-      if (cardEl) await pointAt(cardEl, SPEED);
+      if (cardEl) await pointAt(cardEl, aiSpeed());
       setState(flip(state, pick.position, "ai"));
-      await sleep(AFTER_FLIP_MS);
+      await sleep(450 * aiSpeed());
     }
   } finally {
     aiRunning = false;
@@ -155,6 +157,12 @@ async function start(): Promise<void> {
     mountColumn(colEl[who], who, () => showPlayerDetails(state, who, (pile) => fillPile(pile, state.pairs[who], deps)));
   }
   mountDice(diceEl, () => void roll());
+  const speedBtn = document.querySelector<HTMLButtonElement>("#ai-speed")!;
+  speedBtn.addEventListener("click", () => {
+    aiFast = !aiFast;
+    speedBtn.setAttribute("aria-pressed", String(aiFast));
+    speedBtn.textContent = `AI speed: ${aiFast ? "Fast" : "Normal"}`;
+  });
   document.addEventListener("keydown", (e) => {
     if (state.phase !== "dice" || (e.key !== " " && e.key !== "Enter")) return;
     if (document.querySelector("dialog[open]")) return;

@@ -38,7 +38,56 @@ body {
 }
 
 .top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  width: 100%;
+  max-width: 960px;
   padding: 24px 0 8px;
+}
+
+.top-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.chip-btn {
+  padding: 8px 10px;
+  border: var(--border) solid #000;
+  background: #fff;
+  box-shadow: 3px 3px 0 #000;
+  font: inherit;
+  font-size: 9px;
+  color: #000;
+  cursor: pointer;
+}
+
+.chip-btn[aria-pressed="true"] {
+  background: var(--portal);
+}
+
+.chip-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 #000;
+}
+
+.chip-btn:focus-visible,
+.icon-link:focus-visible {
+  outline: 3px solid var(--portal);
+  outline-offset: 2px;
+}
+
+.icon-link {
+  display: inline-flex;
+  color: var(--ink);
+  filter: drop-shadow(2px 2px 0 #000);
+}
+
+.icon-link:hover {
+  color: var(--portal);
 }
 
 .logo {
