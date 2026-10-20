@@ -55,4 +55,4 @@ The presentation must make clear how the AI works: an **imperfect memory** (rule
 
 ## Explicitly Cut
 
-- **Earlier project ideas (Thaís, inclusive math, education without borders):** set aside for being too large or too similar to something that already exists (Khan Academy). The Thaís scope is saved in `scope-tais.md`.
+- **Earlier project ideas (Thaís, inclusive math, education without borders):** set aside for being too large or too similar to something that already exists (Khan Academy).

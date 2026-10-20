@@ -54,4 +54,4 @@ En la presentación hay que aclarar cómo funciona la IA: una **memoria imperfec
 
 ## Explicitly Cut
 
-- **Los proyectos anteriores (Thaís, matemática inclusiva, educación sin fronteras):** se dejaron de lado por ser demasiado grandes o parecidos a algo que ya existe (Khan Academy). El scope de Thaís está guardado en `scope-tais.md`.
+- **Los proyectos anteriores (Thaís, matemática inclusiva, educación sin fronteras):** se dejaron de lado por ser demasiado grandes o parecidos a algo que ya existe (Khan Academy).
