@@ -74,6 +74,10 @@ npm test           # Vitest, no network (Jev and the Rick and Morty API are mock
 npm run typecheck
 ```
 
+## License
+
+The code is released under the [MIT License](LICENSE). The Rick and Morty characters and images are not covered by it: they belong to their owners (see Credits below).
+
 ## Credits
 
 - Character images from [The Rick and Morty API](https://rickandmortyapi.com), loaded live and never stored in this repo. Rick and Morty © Adult Swim / Warner Bros. Discovery. Non-commercial fan project.
