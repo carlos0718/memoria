@@ -46,6 +46,15 @@ describe("storage", () => {
     expect(loadGame(store)).toEqual(s);
   });
 
+  it("a save from before ties were recorded loads with levelTies 0; a bad levelTies is rejected", () => {
+    const store = memoryStore();
+    const { levelTies: _omit, ...old } = midGame();
+    store.setItem(SAVE_KEY, JSON.stringify(old));
+    expect(loadGame(store)?.levelTies).toBe(0);
+    store.setItem(SAVE_KEY, JSON.stringify({ ...old, levelTies: "x" }));
+    expect(loadGame(store)).toBeNull();
+  });
+
   it("no save, corrupt JSON, wrong version, or a bad shape → fresh start (null)", () => {
     const store = memoryStore();
     expect(loadGame(store)).toBeNull();

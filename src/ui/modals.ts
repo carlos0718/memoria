@@ -4,14 +4,24 @@ import { LAST_LEVEL } from "../game/levels";
 import type { GameState } from "../game/types";
 
 /** A modal with some content and one button. Escape can't skip it: the button moves the game on. */
-export function openOverlay(contentHtml: string, buttonLabel: string, onClose: () => void): HTMLDialogElement {
+export function openOverlay(
+  contentHtml: string,
+  buttonLabel: string,
+  onClose: () => void,
+  secondary?: { label: string; onClick: () => void },
+): HTMLDialogElement {
   const dialog = document.createElement("dialog");
   dialog.className = "modal overlay";
-  dialog.innerHTML = `<form method="dialog" class="modal-body">${contentHtml}<button class="btn" type="submit">${buttonLabel}</button></form>`;
+  const second = secondary ? `<button class="btn btn-secondary" type="button" data-secondary>${secondary.label}</button>` : "";
+  dialog.innerHTML = `<form method="dialog" class="modal-body">${contentHtml}<button class="btn" type="submit">${buttonLabel}</button>${second}</form>`;
   dialog.addEventListener("cancel", (e) => e.preventDefault());
   dialog.querySelector("form")!.addEventListener("submit", () => {
     dialog.remove();
     onClose();
+  });
+  dialog.querySelector("[data-secondary]")?.addEventListener("click", () => {
+    dialog.remove();
+    secondary?.onClick();
   });
   document.body.append(dialog);
   dialog.showModal();
@@ -41,7 +51,11 @@ export function showLevelResult(state: GameState, onNext: () => void): void {
   const a = state.pairs.ai.length;
   const title =
     result === "human" ? "You win the level!" : result === "ai" ? "The AI wins the level!" : "Level tied!";
-  const detail = result === "tie" ? "Nobody scores this time." : "+1 on the level scoreboard.";
+  const detail =
+    result === "tie"
+      ? `Nobody scores this time. Level ties so far: ${state.levelTies}.`
+      : "+1 on the level scoreboard.";
+  const tieNote = state.levelTies > 0 ? ` · Ties ${state.levelTies}` : "";
   const decided = state.level < LAST_LEVEL && isDecided(state);
   const last = state.level >= LAST_LEVEL || decided;
   const leader = state.levelWins.human > state.levelWins.ai ? "The AI" : escapeHtml(state.name);
@@ -56,7 +70,7 @@ export function showLevelResult(state: GameState, onNext: () => void): void {
       <h2>${title}</h2>
       <p class="final-score">Pairs: ${escapeHtml(state.name)} ${h} – ${a} AI</p>
       <p>${detail}</p>
-      <p class="final-score">Levels: ${escapeHtml(state.name)} ${state.levelWins.human} – ${state.levelWins.ai} AI</p>
+      <p class="final-score">Levels: ${escapeHtml(state.name)} ${state.levelWins.human} – ${state.levelWins.ai} AI${tieNote}</p>
       <p>${next}</p>
     </div>`,
     last ? "See the final result" : `Go to level ${state.level + 1}`,

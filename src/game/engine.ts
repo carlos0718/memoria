@@ -49,6 +49,7 @@ export function newGame(seed: number, poolIds: readonly number[]): GameState {
     flipped: [],
     pairs: { human: [], ai: [] },
     levelWins: { human: 0, ai: 0 },
+    levelTies: 0,
     turn: "human",
     aiMemory: {},
     rng,
@@ -103,14 +104,15 @@ export function flip(state: GameState, position: number, by: Player): GameState 
   return matched.every((c) => c.state === "matched") ? scoreLevel(next) : next;
 }
 
-/** No cards left: more pairs wins the level (1 point); a tie scores nothing. */
+/** No cards left: more pairs wins the level (1 point); a tie scores nothing but is counted. */
 function scoreLevel(state: GameState): GameState {
   const h = state.pairs.human.length;
   const a = state.pairs.ai.length;
   const result: Player | "tie" = h > a ? "human" : a > h ? "ai" : "tie";
   const levelWins =
     result === "tie" ? state.levelWins : { ...state.levelWins, [result]: state.levelWins[result] + 1 };
-  return { ...state, levelWins, lastLevelResult: result, phase: "levelEnd" };
+  const levelTies = result === "tie" ? state.levelTies + 1 : state.levelTies;
+  return { ...state, levelWins, levelTies, lastLevelResult: result, phase: "levelEnd" };
 }
 
 /** Best of 5: the game is decided once the lead is bigger than the levels left to play. */

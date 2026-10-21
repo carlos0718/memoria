@@ -67,7 +67,8 @@ function render(): void {
   updateColumn(colEl.ai, "ai", state, deps);
   statusEl.textContent = statusText(state);
   statusEl.dataset.turn = state.phase === "aiTurn" || (state.phase === "revealMismatch" && state.turn === "ai") ? "ai" : state.phase === "dice" || state.phase === "welcome" ? "" : "human";
-  levelEl.textContent = `Level ${state.level} / ${LAST_LEVEL}  ·  ${state.name || "You"} ${state.levelWins.human} – ${state.levelWins.ai} AI`;
+  const ties = state.levelTies > 0 ? `  ·  Ties ${state.levelTies}` : "";
+  levelEl.textContent = `Level ${state.level} / ${LAST_LEVEL}  ·  ${state.name || "You"} ${state.levelWins.human} – ${state.levelWins.ai} AI${ties}`;
 }
 
 function setState(next: GameState): void {
@@ -94,7 +95,13 @@ function enterPhase(prev: GameState | null): void {
     setTimeout(() => showLevelResult(state, () => void goNextLevel()), 700 * SPEED);
   }
   if (arrived("gameOver")) {
-    showGameOver(state, gameWinner(state), () => void loadLevel(restart(state, randomSeed(), POOL_IDS)));
+    showGameOver(
+      state,
+      gameWinner(state),
+      () => void loadLevel(restart(state, randomSeed(), POOL_IDS)),
+      // New player: back to the welcome screen, asking for the name again.
+      () => void loadLevel(newGame(randomSeed(), POOL_IDS)),
+    );
   }
   if (state.phase === "playerTurn") void pointAt(colEl.human.querySelector(".col-name")!, SPEED);
   if (state.phase === "aiTurn") void runAiTurn();

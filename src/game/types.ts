@@ -31,6 +31,8 @@ export interface GameState {
   /** characterIds collected this level. */
   pairs: Record<Player, number[]>;
   levelWins: Record<Player, number>;
+  /** Levels that ended tied: they score for nobody, but they're recorded. */
+  levelTies: number;
   lastLevelResult?: Player | "tie";
   /** Every throw this level; starter is set once a throw isn't a tie. */
   dice?: { rolls: Array<Record<Player, number>>; starter?: Player };

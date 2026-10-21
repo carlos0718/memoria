@@ -542,6 +542,10 @@ body {
   cursor: pointer;
 }
 
+.btn-secondary {
+  background: #fff;
+}
+
 .btn:disabled {
   background: #cfcfcf;
   color: #777;

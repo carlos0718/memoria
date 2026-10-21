@@ -64,6 +64,14 @@ describe("level scoring", () => {
     expect(s.lastLevelResult).toBe("tie");
     expect(s.levelWins).toEqual({ human: 1, ai: 1 });
   });
+
+  it("a tied level is recorded in levelTies, and a win or loss leaves the count alone", () => {
+    const tied = finishLevel(named(), "even");
+    expect(tied.levelTies).toBe(1);
+    const again = finishLevel({ ...named(), levelTies: 1 }, "even");
+    expect(again.levelTies).toBe(2);
+    expect(finishLevel({ ...named(), levelTies: 1 }, "human").levelTies).toBe(1);
+  });
 });
 
 describe("levels and end of game", () => {
@@ -127,12 +135,13 @@ describe("levels and end of game", () => {
 
 describe("restart", () => {
   it("goes back to level 1 at 0–0 with the same name and new characters", () => {
-    const over: GameState = { ...setName(newGame(1, POOL_IDS), "Ana"), level: 5, phase: "gameOver", levelWins: { human: 3, ai: 2 } };
+    const over: GameState = { ...setName(newGame(1, POOL_IDS), "Ana"), level: 5, phase: "gameOver", levelWins: { human: 3, ai: 2 }, levelTies: 1 };
     const s = restart(over, 2, POOL_IDS);
     expect(s.level).toBe(1);
     expect(s.phase).toBe("dice");
     expect(s.name).toBe("Ana");
     expect(s.levelWins).toEqual({ human: 0, ai: 0 });
+    expect(s.levelTies).toBe(0);
     expect(s.cards).toHaveLength(12);
     const ids = (st: GameState) => [...new Set(st.cards.map((c) => c.characterId))].sort();
     expect(ids(restart(over, 3, POOL_IDS))).not.toEqual(ids(restart(over, 4, POOL_IDS)));

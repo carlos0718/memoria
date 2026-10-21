@@ -28,7 +28,8 @@ export function loadGame(store: KeyValueStore | null = browserStore()): GameStat
     const raw = store?.getItem(SAVE_KEY);
     if (!raw) return null;
     const data: unknown = JSON.parse(raw);
-    return isGameState(data) ? data : null;
+    // Saves from before ties were recorded have no levelTies: they start at 0.
+    return isGameState(data) ? { ...data, levelTies: data.levelTies ?? 0 } : null;
   } catch {
     return null;
   }
@@ -70,6 +71,7 @@ export function isGameState(x: unknown): x is GameState {
   if (!isIntArray(x.flipped) || (x.flipped as number[]).length > 2) return false;
   if (!isRecord(x.pairs) || !isIntArray(x.pairs.human) || !isIntArray(x.pairs.ai)) return false;
   if (!isRecord(x.levelWins) || !isInt(x.levelWins.human) || !isInt(x.levelWins.ai)) return false;
+  if (x.levelTies !== undefined && !isInt(x.levelTies)) return false;
   if (!isPlayer(x.turn)) return false;
   if (x.lastLevelResult !== undefined && !isPlayer(x.lastLevelResult) && x.lastLevelResult !== "tie") return false;
   if (x.dice !== undefined) {

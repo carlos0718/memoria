@@ -15,10 +15,16 @@ function celebrate(): void {
   burst();
 }
 
-export function showGameOver(state: GameState, winner: Player | "tie", onRestart: () => void): void {
+export function showGameOver(
+  state: GameState,
+  winner: Player | "tie",
+  onRestart: () => void,
+  onNewPlayer: () => void,
+): void {
   const { human, ai } = state.levelWins;
   const name = escapeHtml(state.name);
-  const score = `<p class="final-score">${name} ${human} – ${ai} AI</p>`;
+  const ties = state.levelTies > 0 ? `<p>Tied levels: ${state.levelTies}</p>` : "";
+  const score = `<p class="final-score">${name} ${human} – ${ai} AI</p>${ties}`;
   const art =
     winner === "human"
       ? `<div class="trophy-spin">${trophySvg()}</div>`
@@ -37,6 +43,7 @@ export function showGameOver(state: GameState, winner: Player | "tie", onRestart
     `<div class="result result-${winner}">${art}<h2>${title}</h2>${score}<p>${line}</p></div>`,
     "Play again",
     onRestart,
+    { label: "New player", onClick: onNewPlayer },
   );
   if (winner === "human") celebrate();
 }
